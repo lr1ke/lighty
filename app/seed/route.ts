@@ -1,7 +1,6 @@
 // import bcrypt from 'bcrypt';
-import postgres from 'postgres';
-const bcrypt = require('bcryptjs');
 
+import postgres from 'postgres';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 
@@ -102,10 +101,14 @@ export async function GET() {
 
     console.log("Database setup completed successfully.");
     return Response.json({ message: "Database setup completed successfully" });
-  } catch (error) {
-    console.error("Database setup error:", error.message, error.stack);
-    return Response.json({ error: `Database setup failed: ${error.message}` }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("❌ Database setup error:", error.message, error.stack);
+    } else {
+      console.error("❌ Database setup failes:", error);
+    }
   }
-}
+
+
 
 
