@@ -7,14 +7,16 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 
 export async function POST(req: NextRequest) {
-//   try {
-//     const user_id = await getAuthenticatedUserId(req);
-//     if (!user_id) {
-//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-//     }
-
-
+  try {
+    // const user_id = await getAuthenticatedUserId(req);
     const user_id = "a05602c5-6ace-4819-91f3-bb0e0f329c85";
+    if (!user_id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+
+    }
+
+
     const { content, theme_id, location } = await req.json();
 
     // ✅ Validate content
