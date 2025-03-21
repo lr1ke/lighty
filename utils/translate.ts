@@ -1,16 +1,24 @@
 import axios from "axios";
 
-const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY!;
 
-export const translateText = async (text) => {
+interface ChatCompletionResponse {
+  choices: { message: { content: string } }[];
+}
+
+export const translateText = async (text: string): Promise<string | null> => {
   try {
     console.log("Translating text...");
-    const response = await axios.post(
+
+    const response = await axios.post<ChatCompletionResponse>(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-4",
         messages: [
-          { role: "system", content: "Translate the following text into English:" },
+          {
+            role: "system",
+            content: "Translate the following text into English:",
+          },
           { role: "user", content: text },
         ],
       },
@@ -25,7 +33,7 @@ export const translateText = async (text) => {
     const translatedText = response.data.choices[0].message.content.trim();
     console.log("Translated Text:", translatedText);
     return translatedText;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error translating text:", error.response?.data || error.message);
     return null;
   }

@@ -6,12 +6,12 @@
 
 import axios from "axios";
 
-const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-const audioCache = new Map(); // Store cached audio
+const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY!;
+const audioCache = new Map<string, string>(); // Cache audio URLs by key
 
-const ALL_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"]; // OpenAI voices
+const ALL_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"];
 
-const LANGUAGES = {
+export const LANGUAGES: Record<string, { name: string }> = {
   en: { name: "English" },
   de: { name: "German" },
   es: { name: "Spanish" },
@@ -25,39 +25,34 @@ const LANGUAGES = {
   pt: { name: "Portuguese" },
 };
 
-// **Detect text language**
-const detectLanguage = (text) => {
-  if (text.match(/[äöüß]/i)) return "de";
-  if (text.match(/[áéíóúñ]/i)) return "es";
-  if (text.match(/[àâêîôûç]/i)) return "fr";
-  if (text.match(/[А-яЁё]/i)) return "ru";
-  if (text.match(/[\u4e00-\u9fff]/)) return "zh";
-  if (text.match(/[ऀ-ॿ]/)) return "hi";
-  if (text.match(/[ء-ي]/)) return "ar";
-  if (text.match(/[çşğüöı]/i)) return "tr";
-  if (text.match(/[àèéìòù]/i)) return "it";
-  if (text.match(/[ãõç]/i)) return "pt";
-  return "en"; // Default English
+const detectLanguage = (text: string): string => {
+  if (/[\u4e00-\u9fff]/.test(text)) return "zh";
+  if (/[А-яЁё]/i.test(text)) return "ru";
+  if (/[äöüß]/i.test(text)) return "de";
+  if (/[áéíóúñ]/i.test(text)) return "es";
+  if (/[àâêîôûç]/i.test(text)) return "fr";
+  if (/[ऀ-ॿ]/.test(text)) return "hi";
+  if (/[ء-ي]/.test(text)) return "ar";
+  if (/[çşğüöı]/i.test(text)) return "tr";
+  if (/[àèéìòù]/i.test(text)) return "it";
+  if (/[ãõç]/i.test(text)) return "pt";
+  return "en";
 };
 
-// Randomly select a voice for each entry
-const getRandomVoice = () => {
+const getRandomVoice = (): string => {
   return ALL_VOICES[Math.floor(Math.random() * ALL_VOICES.length)];
 };
 
-// **Translate text using OpenAI GPT**
-const translateText = async (text, targetLang) => {
+const translateText = async (text: string, targetLang: string): Promise<string> => {
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-4",
         messages: [
-          { 
-            role: "system", 
-            content: `Translate the following text into ${targetLang}. 
-                     Maintain all original spacing, punctuation, and formatting.
-                     Do not modify, normalize, or correct the text in any way besides translation.` 
+          {
+            role: "system",
+            content: `Translate the following text into ${targetLang}. Maintain all original spacing, punctuation, and formatting. Do not modify, normalize, or correct the text in any way besides translation.`,
           },
           { role: "user", content: text },
         ],
@@ -72,115 +67,34 @@ const translateText = async (text, targetLang) => {
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error("Translation Error:", error);
-    return text; // Fallback to original text if translation fails
+    return text;
   }
 };
 
-// Debounce function
-const debounce = (func, delay) => {
-  let timeoutId;
-  return (...args) => {
-      if (timeoutId) {
-          clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-          func(...args);
-      }, delay);
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
   };
 };
 
-// **Handle Mouse Enter Function**
-export const handleMouseEnter = debounce(async (content, translateTo) => {
+export const handleMouseEnter = debounce(async (content: string, translateTo: string | null) => {
   const cacheKey = `${content}-${translateTo}`;
-  if (audioCache.has(cacheKey)) {
-      console.log("Audio already preloaded from cache");
-      return; // Skip if already cached
-  }
-  console.log(`Preloading audio for content: ${content} with translation: ${translateTo}...`);
-      // Validate content
-      if (!content || content.trim() === "") {
-        console.error("Content is empty or invalid.");
-        return; // Exit early if content is invalid
-    }
-        // Get a random voice
-        const selectedVoice = getRandomVoice();
-        console.log("Selected voice:", selectedVoice);
+  if (audioCache.has(cacheKey)) return;
+  if (!content.trim()) return;
+
+  const selectedVoice = getRandomVoice();
 
   try {
-      // Fetch audio data from your API
-      const response = await axios.post("https://api.openai.com/v1/audio/speech", {
-          model: "tts-1-hd", 
-          input: content, 
-          voice: selectedVoice, 
-          response_format: "mp3",
-          speed: 1.0
-      }, {
-          headers: {
-              Authorization: `Bearer ${OPENAI_API_KEY}`,
-              "Content-Type": "application/json",
-          },
-          responseType: "arraybuffer", // Expecting binary data
-      });
-
-      // Create a Blob from the response data
-      const audioBlob = new Blob([response.data], { type: "audio/mp3" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      // Store the audio URL in the cache
-      audioCache.set(cacheKey, audioUrl);
-      console.log("Audio preloaded and cached successfully.");
-    } catch (error) {
-      console.log("Error preloading audio.");
-  }
-}, 3000); // 3 seconds delay
-
-// **Preload Audio Function**
-const preloadAudio = (text, selectedVoice) => {
-  const cacheKey = `${text}-${selectedVoice}`;
-  if (audioCache.has(cacheKey)) {
-    console.log("Audio already preloaded from cache");
-    return audioCache.get(cacheKey);
-  }
-  console.log(`Preloading audio for voice ${selectedVoice}...`);
-  // Logic to preload audio can be added here if needed
-  return null; // Return null if not preloaded
-};
-
-// **Read Aloud Function (with Translation)**
-export const readEntryContent = async (text, translateTo = null) => {
-  const detectedLang = detectLanguage(text);
-  const selectedVoice = getRandomVoice(); // Pick a random voice
-
-  let finalText = text;
-
-  // Preload audio if needed
-  // preloadAudio(finalText, selectedVoice); // This line is commented out, ensure it's not needed
-
-  // 🛑 **Only translate if explicitly requested**
-  if (translateTo && translateTo !== detectedLang) {
-    console.log(`Translating text from ${detectedLang} to ${translateTo}...`);
-    finalText = await translateText(text, translateTo);
-  }
-
-  // Check cache first
-  const cacheKey = `${finalText}-${selectedVoice}`;
-  if (audioCache.has(cacheKey)) {
-    console.log("Playing cached audio");
-    const audio = new Audio(audioCache.get(cacheKey));
-    audio.play();
-    return;
-  }
-
-  try {
-    console.log(`Fetching new audio with voice ${selectedVoice}...`);
     const response = await axios.post(
       "https://api.openai.com/v1/audio/speech",
       {
-        model: "tts-1-hd", // Use HD model for better accuracy
-        input: finalText,
+        model: "tts-1-hd",
+        input: content,
         voice: selectedVoice,
         response_format: "mp3",
-        speed: 1.0
+        speed: 1.0,
       },
       {
         headers: {
@@ -193,15 +107,58 @@ export const readEntryContent = async (text, translateTo = null) => {
 
     const audioBlob = new Blob([response.data], { type: "audio/mp3" });
     const audioUrl = URL.createObjectURL(audioBlob);
-    
-    // Cache the audio
     audioCache.set(cacheKey, audioUrl);
-    
+  } catch (error) {
+    console.error("Error preloading audio:", error);
+  }
+}, 3000);
+
+export const readEntryContent = async (text: string, translateTo?: string | null): Promise<void> => {
+  const detectedLang = detectLanguage(text);
+  const selectedVoice = getRandomVoice();
+
+  let finalText = text;
+
+  if (translateTo && translateTo !== detectedLang) {
+    finalText = await translateText(text, translateTo);
+  }
+
+  const cacheKey = `${finalText}-${selectedVoice}`;
+  if (audioCache.has(cacheKey)) {
+    const cachedAudio = new Audio(audioCache.get(cacheKey)!);
+    cachedAudio.play();
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/audio/speech",
+      {
+        model: "tts-1-hd",
+        input: finalText,
+        voice: selectedVoice,
+        response_format: "mp3",
+        speed: 1.0,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        responseType: "arraybuffer",
+      }
+    );
+
+    const audioBlob = new Blob([response.data], { type: "audio/mp3" });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    audioCache.set(cacheKey, audioUrl);
+
     const audio = new Audio(audioUrl);
     audio.play();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating speech:", error);
-    console.error("Error details:", error.response?.data ? 
-      new TextDecoder().decode(error.response.data) : error.message);
+    console.error("Details:", error.response?.data
+      ? new TextDecoder().decode(error.response.data)
+      : error.message);
   }
 };

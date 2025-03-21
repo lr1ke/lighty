@@ -8,6 +8,8 @@ import { transcribeAudio } from '@/utils/transcribeAudio';
 import { translateText } from '@/utils/translate';
 import { MicrophoneIcon, StopIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import { getVerifiedLocation } from '@/utils/getVerifiedLocation';
+
 
 interface Coordinates {
   latitude: number;
@@ -65,7 +67,7 @@ const PromptCard: FC<PromptCardProps> = ({ title, content, isActive, onNext, onP
           onClick={onSelect}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Use This Prompt
+          Select
         </button>
         <button
           onClick={onNext}
@@ -143,6 +145,7 @@ const CreateComp: FC = () => {
     }
   }, [audioBlob]);
 
+
   const handlePromptSelect = (themeKey: string) => {
     const selectedTheme = themes.find(t => t.name === themeKey);
     if (selectedTheme) {
@@ -179,6 +182,40 @@ const CreateComp: FC = () => {
     setIsTranslating(false);
   };
 
+  // const getLocation = async (): Promise<string> => {
+  //   return new Promise((resolve, reject) => {
+  //     if (!navigator.geolocation) {
+  //       toast.error('Geolocation is not supported by your browser');
+  //       return reject('Geolocation not supported');
+  //     }
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         try {
+  //           const { latitude, longitude } = position.coords;
+  //           const response = await fetch(
+  //             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+  //           );
+  //           const data = await response.json();
+  //           const locationString: string = data.address.city ||
+  //             data.address.town ||
+  //             data.address.village ||
+  //             data.address.suburb ||
+  //             data.address.municipality ||
+  //             `${latitude}, ${longitude}`;
+  //           resolve(locationString);
+  //         } catch (err) {
+  //           console.error('Location fetch error:', err);
+  //           reject(err);
+  //         }
+  //       },
+  //       (error) => {
+  //         toast.error('Unable to retrieve your location');
+  //         reject(error);
+  //       }
+  //     );
+  //   });
+  // };
+
   const getLocation = (): Promise<Coordinates | null> => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
@@ -197,23 +234,27 @@ const CreateComp: FC = () => {
     });
   };
 
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!content.trim() || !themeId) {
       setError('Please select a theme and write some content.');
+      toast.error('Please select a theme and write some content.');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const coords = await getLocation();
+      // const coords = await getLocation();
+      const finalLocation = await getLocation();
+
       const res = await fetch('/api/entries/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content,
           theme_id: themeId,
-          location: coords,
+          location: finalLocation,
         }),
       });
       const result: { message?: string; error?: string } = await res.json();
@@ -243,7 +284,6 @@ const CreateComp: FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 order-2 lg:order-1">
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                <form onSubmit={handleSubmit}>
                 <select
                   value={themeId}
                   onChange={handleThemeChange}
@@ -260,6 +300,7 @@ const CreateComp: FC = () => {
                   })}
                 </select>
 
+        <form onSubmit={handleSubmit}>
         <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
@@ -306,23 +347,51 @@ const CreateComp: FC = () => {
         </form>
         </div>
         </div>
+
         <div className="lg:col-span-1 order-1 lg:order-2">
-        <div className="relative h-[300px] lg:h-auto">
+              <div className="relative h-[300px] lg:h-auto">
                 {prompts.map((prompt, index) => (
-                  <PromptCard
+                  <div
                     key={index}
-                    title={prompt.title}
-                    content={prompt.content}
-                    isActive={activeCard === index}
-                    onNext={() => setActiveCard(Math.min(prompts.length - 1, activeCard + 1))}
-                    onPrev={() => setActiveCard(Math.max(0, activeCard - 1))}
-                    isFirst={index === 0}
-                    isLast={index === prompts.length - 1}
-                    onSelect={() => handlePromptSelect(prompt.themeKey)}
-                  />
+                    className={`absolute top-0 left-0 w-full transition-all duration-500 transform ${
+                      activeCard === index ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'
+                    }`}
+                  >
+                    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">{prompt.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line mb-4">{prompt.content}</p>
+                      <div className="flex justify-between items-center">
+                        <button
+                          onClick={() => setActiveCard(Math.max(0, activeCard - 1))}
+                          className={`p-2 rounded-full ${
+                            index === 0 ? 'invisible' : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                          disabled={index === 0}
+                        >
+                          <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => handlePromptSelect(prompt.themeKey)}
+                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                          Use This Prompt
+                        </button>
+                        <button
+                          onClick={() => setActiveCard(Math.min(prompts.length - 1, activeCard + 1))}
+                          className={`p-2 rounded-full ${
+                            index === prompts.length - 1 ? 'invisible' : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                          disabled={index === prompts.length - 1}
+                        >
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+
         </div>
         </div>
         </div>
