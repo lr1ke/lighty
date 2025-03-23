@@ -2,19 +2,17 @@
 import React, { useEffect, useState } from "react";
 
 
-
 interface Entry {
-    id: string;
-    theme_id: string;
-    thread_id: string | null;
+    entry_id: string;
     content: string;
-    city: string;
-    state: string;
-    location: string;
-    created_at: string;
+    entry_created_at: string;
+    thread_id: string;
+    theme_id: string;
+    name: string;
   }
 
-const KiezPage: React.FC = () => {
+
+const ThemesPage: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -27,18 +25,17 @@ const KiezPage: React.FC = () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/entries/get/kiez?limit=${limit}&offset=${offset}`);
+      const res = await fetch(`/api/entries/get/themes?limit=${limit}&offset=${offset}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch entries");
 
 
       setEntries((prev) => {
-        const existingIds = new Set(prev.map(entry => entry.id));
-        const newUniqueEntries = data.filter((entry: Entry) => !existingIds.has(entry.id));
+        const existingIds = new Set(prev.map(entry => entry.entry_id));
+        const newUniqueEntries = data.filter((entry: Entry) => !existingIds.has(entry.entry_id));
         return [...prev, ...newUniqueEntries];
       });
-      
-            setHasMore(data.length === limit);
+      setHasMore(data.length === limit);
       setOffset((prev) => prev + limit);
     } catch (err: any) {
       setError(err.message || "Unknown error");
@@ -62,29 +59,40 @@ const KiezPage: React.FC = () => {
   }, []);
 
   const grouped = entries.reduce<Record<string, Entry[]>>((acc, entry) => {
-    acc[entry.city] = acc[entry.city] || [];
-    acc[entry.city].push(entry);
+    if (entry.theme_id) {
+      acc[entry.theme_id] = acc[entry.theme_id] || [];
+      acc[entry.theme_id].push(entry);
+    }
     return acc;
   }, {});
 
+  const themeMeta = (themeId: string): Entry => {
+    return entries.find(e => e.theme_id === themeId)!;
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Kiez Diary</h1>
+      <h1 className="text-3xl font-bold mb-4">Themes</h1>
       {error && <p className="text-red-500">{error}</p>}
 
-      {Object.keys(grouped).map((city) => (
-        <div key={city} className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">{city}</h2>
-          {grouped[city].map((entry) => (
-            <div key={entry.id} className="p-4 bg-white shadow rounded mb-2">
-              <p className="text-gray-800">{entry.content}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {entry.state} • {new Date(entry.created_at).toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      ))}
+   
+{Object.keys(grouped).map((themeId) => {
+        const meta = themeMeta(themeId);
+        return (
+          <div key={themeId} className="mb-8">
+            <h2 className="text-2xl font-semibold mb-1">{meta.name}</h2>
+
+            {grouped[themeId].map((entry) => (
+              <div key={entry.entry_id} className="p-4 bg-white shadow rounded mb-2">
+                <p className="text-gray-800">{entry.content}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {new Date(entry.entry_created_at).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        );
+      })}
 
       {loading && <p className="text-center mt-4">Loading more...</p>}
       {!hasMore && <p className="text-center mt-4 text-gray-500">No more entries.</p>}
@@ -92,4 +100,4 @@ const KiezPage: React.FC = () => {
   );
 };
 
-export default KiezPage;
+export default ThemesPage;

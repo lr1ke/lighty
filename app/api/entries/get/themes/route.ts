@@ -3,30 +3,27 @@ import postgres from 'postgres';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-interface ThreadEntry {
+interface Entry {
     entry_id: string;
     content: string;
     entry_created_at: string;
     thread_id: string;
-    title: string;
-    description: string;
-    thread_created_at: string;
+    theme_id: string;
+    name: string;
   }
   
   export async function GET(req: NextRequest) {
     try {
-      const entries: ThreadEntry[] = await sql`
+      const entries: Entry[] = await sql`
         SELECT 
           entries.id AS entry_id,
           entries.content,
           entries.created_at AS entry_created_at,
-          threads.id AS thread_id,
-          threads.title,
-          threads.description,
-          threads.created_at AS thread_created_at
+          themes.id AS theme_id,
+          themes.name
         FROM entries
-        JOIN threads ON entries.thread_id = threads.id
-        ORDER BY threads.created_at DESC;
+        JOIN themes ON entries.theme_id = themes.id
+        ORDER BY themes.name DESC;
       `;
   
       return NextResponse.json(entries, { status: 200 });

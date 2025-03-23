@@ -374,7 +374,7 @@ const CreateComp: FC = () => {
                           onClick={() => handlePromptSelect(prompt.themeKey)}
                           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                         >
-                          Use This Prompt
+                          Select
                         </button>
                         <button
                           onClick={() => setActiveCard(Math.min(prompts.length - 1, activeCard + 1))}

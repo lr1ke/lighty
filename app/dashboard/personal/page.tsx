@@ -35,8 +35,11 @@ const PersonalComp: React.FC = () => {
         throw new Error(errorText || 'Failed to fetch entries');
       }
       const data: Entry[] = await res.json();
-      setEntries((prev) => [...prev, ...data]);
-      if (data.length < LIMIT) {
+      setEntries((prev) => {
+        const existingIds = new Set(prev.map(entry => entry.id));
+        const newUniqueEntries = data.filter((entry: Entry) => !existingIds.has(entry.id));
+        return [...prev, ...newUniqueEntries];
+      });      if (data.length < LIMIT) {
         setHasMore(false);
       }
     } catch (err: any) {
