@@ -12,6 +12,7 @@ interface Entry {
   thread_id: string | null;
   content: string;
   location: string;
+  city: string;
   created_at: string;
 }
 
@@ -149,7 +150,7 @@ const PersonalComp: React.FC = () => {
                   {entry.location && (
                     <span className="flex items-center space-x-1 hover:text-blue-500">
                       <MapPin className="w-4 h-4" />
-                      <span className="text-xs">{entry.location}</span>
+                      <span className="text-xs">{entry.city}</span>
                     </span>
                   )}
                 </div>

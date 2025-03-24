@@ -1,17 +1,19 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { SpeakerWaveIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { SpeakerWaveIcon, GlobeAltIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { readEntryContent, handleMouseEnter } from '@/utils/textToSpeech';
 import { MoreHorizontal, Clock, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+
 
 interface Entry {
   id: string;
   theme_id: string;
   theme_name: string;
   thread_id: string | null;
+  thread_title: string | null;
   content: string;
   location: string | null;
   city: string | null;
@@ -30,7 +32,7 @@ const themeColors: Record<string, string> = {
 
 const LIMIT = 50;
 
-const PersonalComp: React.FC = () => {
+const GlobalComp: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -152,43 +154,112 @@ const PersonalComp: React.FC = () => {
             <div className="flex space-x-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
+                                   {/* Darstellung von Themen */}
 
-                <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
+                    {/* Darstellung der Zeit, über */}
+                <span className="text-xs sm:text-ms text-gray-400">
+                    {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, {''}
+                    {new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {''}
+                    
+                    {/* <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
                   <button
-                        className={`w-4 h-4 rounded-full ${themeColors[entry.theme_name] || 'bg-gray-300'}`}
-                        title={`View all entries for ${entry.theme_name}`}
-                    />
-                  </Link>
+                        className={`w-4 h-4 squared-full text-gray-500 text-sm ${themeColors[entry.theme_name] || 'bg-gray-300'}`}
+                        title={`View all entries for ${entry.theme_name}`}>
+                       <span className={`text-xs text-gray-600 ${themeColors[entry.theme_name] || 'text-gray-500'}`}>
+                          {entry.theme_name}
+                        </span>                        
+                        </button>      
+                </Link>   */}
 
-                  <button onClick={() => toggleExpand(entry.id)} className="text-blue-500 text-sm mt-1">
-                    {expandedIds.has(entry.id) ? '<' : '...'}
+                    {/* Klick nach Gruppe */}
+                    {entry.thread_id && (
+                    <Link href={`/dashboard/groups/${entry.thread_id}`} passHref> 
+                 
+                    <button className="text-gray-400 text-sm" 
+                    title={entry.thread_title? entry.thread_title : ''}
+                   
+                    >
+                        <UserGroupIcon className="w-4 h-4" />
+                    </button>
+                    </Link>
+                  )} {''}
+                                      {/* Knopf für Stimme */}
+                <button
+                    className="text-gray-400 text-sm hover:text-red-500"
+                    onMouseEnter={() => handleMouseEnter(entry.content, translateTo)}
+                    onClick={() => readEntryContent(entry.content, translateTo)}
+                  >
+                    <SpeakerWaveIcon className="w-6 h-4 text-blue-300" />
                   </button>
-                </div>
+                  
+                  </span>
+                  {/* <span className="flex items-center space-x-2 hover:text-blue-500 text-xs sm:text-xs" title={new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}>
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" /> 
+                  </span> */}
+                  {/* {entry.thread_id && (
+                    <button className="text-blue-500 text-sm" title={`View thread: ${entry.theme_name}`}>
+                      {entry.theme_name}
+                    </button>
+                  )} */}
 
+                                    {/* symbol für gruppe */}
+                    {/* {entry.thread_id && (
+                    <button className="text-gray-400 text-sm" 
+                    title={entry.thread_title? entry.thread_title : ''}
+                    >
+                        <UserGroupIcon className="w-4 h-4" />
+                    </button>
+                  )} */}
+
+                  {/* Darstellung von größer als, kleiner als, über */}
+
+                  
+                  <button onClick={() => toggleExpand(entry.id)} className="text-blue-500 text-sm"
+                  title={expandedIds.has(entry.id) ? 'show less' : 'expand text '}
+                  >
+                    {expandedIds.has(entry.id) ? '<' : '>'}
+                  </button>
+
+                  {/* Darstellung des Inhalts */}
+                </div>
                 <p className="mt-2 text-gray-900 whitespace-pre-wrap">
                     {expandedIds.has(entry.id)
                     ? entry.content
                     : entry.content.slice(0, 280) + (entry.content.length > 280 ? '...' : '')}
                 </p>
 
+                    {/* Unter Zeile   */}
                 <div className="mt-3 flex justify-between items-center text-gray-500">
+                {/* Darstellung von Themen */}
+                <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
+                  <button
+                        className={`w-4 h-4 squared-full text-gray-500 text-sm ${themeColors[entry.theme_name] || 'bg-gray-300'}`}
+                        title={`View all entries for ${entry.theme_name}`}>
+                       <span className={`text-xs text-gray-600 ${themeColors[entry.theme_name] || 'text-gray-500'}`}>
+                          {entry.theme_name}
+                        </span>                        
+                        </button>      
+                </Link>  
+                                {/* <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
+                  <button
+                        className={`w-4 h-4 squared-full text-xs text-gray-600 ${themeColors[entry.theme_name] || 'bg-gray-300'}`}
+                        title={`View all entries for ${entry.theme_name}`}>
+                        {entry.theme_name}
+                        </button>
+                </Link>  */}
 
+                    {/* Knopf für Stimme
                 <button
                     className="flex items-center space-x-2 hover:text-red-500"
                     onMouseEnter={() => handleMouseEnter(entry.content, translateTo)}
                     onClick={() => readEntryContent(entry.content, translateTo)}
                   >
-                    <SpeakerWaveIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-
-                  <span className="flex items-center space-x-2 hover:text-blue-500" title={new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}>
-                    <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </span>
-                  <span className="text-xs sm:text-sm">{new Date(entry.created_at).toLocaleDateString()}</span>
-                  
+                    <SpeakerWaveIcon className="w-5 h-5 text-blue-300" />
+                  </button> */}
 
 
-                  {entry.city && (
+                  {/* Knopf dynamisch nach Stadt */}
+                  {entry.city && ( 
                   <Link href={`/dashboard/kiez/${entry.city}`} passHref>
                     <button title={`View all entries for ${entry.city}`}>
                       <span className="flex items-center space-x-1 hover:text-blue-500">
@@ -212,4 +283,4 @@ const PersonalComp: React.FC = () => {
   );
 };
 
-export default PersonalComp;
+export default GlobalComp;

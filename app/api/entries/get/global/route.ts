@@ -9,6 +9,7 @@ interface Entry {
   theme_id: string;
   theme_name: string;
   thread_id: string | null;
+  thread_title: string | null;
   city: string | null;
   state: string | null;
   location: string | null;
@@ -32,9 +33,11 @@ export async function GET(req: NextRequest) {
         entries.city, 
         entries.state, 
         entries.location, 
-        entries.created_at
+        entries.created_at,
+        threads.title AS thread_title  
       FROM entries
       JOIN themes ON entries.theme_id = themes.id
+      LEFT JOIN threads ON entries.thread_id = threads.id  
       ORDER BY entries.created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `;

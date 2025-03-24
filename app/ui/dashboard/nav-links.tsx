@@ -25,11 +25,6 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   {
-    name: 'Groups',
-    href: '/dashboard/groups',
-    icon: UserGroupIcon,
-  },
-  {
     name: 'Global',
     href: '/dashboard/global',
     icon: UserGroupIcon,
