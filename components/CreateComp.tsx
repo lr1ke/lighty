@@ -9,6 +9,7 @@ import { translateText } from '@/utils/translate';
 import { MicrophoneIcon, StopIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { getVerifiedLocation } from '@/utils/getVerifiedLocation';
+import StarryBackground from '@/app/ui/dashboard/starryBackground';
 
 
 interface Coordinates {
