@@ -16,3 +16,15 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+
+/* Theme utility classes */
+.hover\:theme-accent-hover:hover {
+  color: var(--text-hover);
+}
+
+.hover\:theme-card-hover:hover {
+  background-color: var(--card-hover-bg);
+}
+
+/* Add any other theme-specific utility classes here */
