@@ -21,21 +21,22 @@ export default function Page() {
       
       <div className={`max-w-3xl mx-auto ${styles.bgSecondary} rounded-lg p-6 shadow-lg ${styles.borderColor} border`}>
         <p className={`${styles.textPrimary} mb-4`}>
-          Welcome to your personal journaling space. Here you can record your thoughts, experiences, and reflections.
+          Welcome to our collective journaling space. Here you can record your thoughts, experiences, and reflections.
         </p>
         
         <p className={`${styles.textPrimary} mb-4`}>
-          Choose a theme that suits your mood using the theme switcher in the top right corner.
+          Choose the colors that suits your mood using the theme switcher in the top right corner.
         </p>
         
         <ul className={`list-disc pl-5 ${styles.textPrimary} mb-4`}>
-          <li className="mb-2">Create new entries to capture your thoughts</li>
+          <li className="mb-2">Create new entries to capture and share your thoughts</li>
           <li className="mb-2">View your personal entries to reflect on past experiences</li>
           <li className="mb-2">Explore global entries to connect with others</li>
         </ul>
         
         <p className={`${styles.textSecondary} italic`}>
-          "The journal is a vehicle for my sense of selfhood. It represents me as emotionally and spiritually independent." — Susan Sontag
+          "Some quote..."
+          {/* "The journal is a vehicle for my sense of selfhood. It represents me as emotionally and spiritually independent." — Susan Sontag */}
         </p>
       </div>
     </main>
