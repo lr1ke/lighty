@@ -54,7 +54,8 @@ export const themeStyles = {
   ocean: {
     // Background colors - updated to match exactly
     bgPrimary: 'bg-[#0a1428]',
-    bgSecondary: 'bg-[#0a1428]',
+    // bgSecondary: 'bg-[#0a1428]',
+    bgSecondary: 'bg-[#0c2040]',
     bgTertiary: 'bg-[#0a3c5e]',
     bgHover: 'hover:bg-teal-900/20',
     

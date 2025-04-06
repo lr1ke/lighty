@@ -2,18 +2,26 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { SpeakerWaveIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { SpeakerWaveIcon, GlobeAltIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { readEntryContent, handleMouseEnter } from '@/utils/textToSpeech';
-import { MoreHorizontal, Clock, MapPin, Waves } from 'lucide-react';
+import { MoreHorizontal, ChevronUp, Clock, MapPin, Waves } from 'lucide-react';
 import toast from 'react-hot-toast';
-import UnderwaterBackground from '@/app/ui/dashboard/underwater';
+import { useTheme } from '@/app/context/ThemeContext';
+import { lusitana } from '@/app/ui/fonts';
+import { inter } from '@/app/ui/fonts';
+import Link from 'next/link';
+
+
 interface Entry {
   id: string;
   theme_id: string;
+  theme_name: string;
   thread_id: string | null;
+  thread_title: string | null;
   content: string;
-  location: string;
-  city: string;
+  location: string | null;
+  city: string | null;
+  state: string | null;
   created_at: string;
 }
 
@@ -27,6 +35,9 @@ const PersonalComp: React.FC = () => {
   const [showTranslationOptions, setShowTranslationOptions] = useState<boolean>(false);
   const [offset, setOffset] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const { theme, themeColors, styles } = useTheme();
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
 
   const fetchEntries = async (currentOffset: number) => {
     setLoading(true);
@@ -69,145 +80,173 @@ const PersonalComp: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loading]);
 
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
+  };
+
   return (
-    <div className="max-w-2xl mx-auto bg-[#0a1428] min-h-screen text-teal-200 relative overflow-hidden">
+    <div className="relative min-h-screen">
 
+    <div className={`max-w-2xl mx-auto  overflow-hidden ${styles.bgPrimary}`}>
       <div className="relative z-10">
-        <div className="sticky top-0 z-20 bg-[#0a2c46] bg-opacity-90 backdrop-blur-sm border-b border-teal-800/30 shadow-lg">
+        <div className={`sticky top-0 z-20 ${styles.bgSecondary} bg-opacity-90 backdrop-blur-sm ${styles.borderColor} border-b shadow-lg`}>
           <div className="px-6 py-4 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-teal-300 flex items-center space-x-3">
-              {/* <Waves className="w-8 h-8 text-teal-500" /> */}
-              <span>🌊 Monoid  Ocean<button>🐚</button></span>
-
+            <h2 className={`text-xl font-bold flex items-center space-x-3 ${lusitana.className} ${styles.textAccent}`}>
+              <span>
+                {styles.icon} Monoid
+              </span>
             </h2>
-
+            {/* Translation options */}
             <div className="flex space-x-4">
               <button 
                 onClick={() => setShowTranslationOptions(!showTranslationOptions)}
-                className="hover:text-teal-500 transition-colors"
-              >
-                <GlobeAltIcon className="w-6 h-6" />
+                className={`${styles.hoverText} transition-colors`}>
+                  🌍
               </button>
-
               <button
-                className="flex items-center space-x-2 hover:text-teal-400 transition-colors"
+                className={`flex items-center space-x-2 hover:opacity-80 transition-opacity ${styles.textAccent}`}
                 onClick={() => readEntryContent(entries.map(e => e.content).join('. '), translateTo)}
               >
-                <SpeakerWaveIcon className="w-5 h-5 text-teal-300" />
+                <SpeakerWaveIcon className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {showTranslationOptions && (
-            <div className="p-4 bg-[#0a3c5e] rounded-b-lg shadow-xl border-t border-teal-800/30">
-              <label className="text-sm font-medium">
-                Communication Protocol:
-                <select
-                  className="ml-2 border border-teal-700 bg-[#0a2c46] text-teal-200 p-1 rounded"
-                  value={translateTo || ''}
-                  onChange={(e) => setTranslateTo(e.target.value || null)}
-                >
-                  <option value="" className="bg-[#0a2c46]">Native Comm</option>
-                  <option value="en" className="bg-[#0a2c46]"> English</option>
-                  <option value="de" className="bg-[#0a2c46]"> German</option>
-                  <option value="es" className="bg-[#0a2c46]"> Spanish</option>
-                  <option value="fr" className="bg-[#0a2c46]"> French</option>
-                  <option value="ru" className="bg-[#0a2c46]"> Russian</option>
-                  <option value="zh" className="bg-[#0a2c46]"> Chinese</option>
-                  <option value="hi" className="bg-[#0a2c46]"> Hindi</option>
-                  <option value="ar" className="bg-[#0a2c46]"> Arabic</option>
-                  <option value="tr" className="bg-[#0a2c46]"> Turkish</option>
+         {showTranslationOptions && (
+            <div className={`p-4 rounded-b-lg shadow-xl ${styles.textPrimary} ${styles.borderColor} border-t`}>
+            <label className={`text-sm font-medium ${styles.textPrimary}`}>
+              Communication Protocol:
+              <select
+                className={`ml-2 p-1 rounded ${styles.bgHover} ${styles.textPrimary} ${styles.borderColor} border`}
+                value={translateTo || ''}
+                onChange={(e) => setTranslateTo(e.target.value || null)}
+              >
+                  <option value="" className="bg-[#E9B44C]">Native Comm</option>
+                  <option value="en" className="bg-[#E9B44C]">English</option>
+                  <option value="de" className="bg-[#E9B44C]">German</option>
+                  <option value="es" className="bg-[#E9B44C]">Spanish</option>
+                  <option value="fr" className="bg-[#E9B44C]">French</option>
+                  <option value="ru" className="bg-[#E9B44C]">Russian</option>
+                  <option value="zh" className="bg-[#E9B44C]">Chinese</option>
+                  <option value="hi" className="bg-[#E9B44C]">Hindi</option>
+                  <option value="ar" className="bg-[#E9B44C]">Arabic</option>
+                  <option value="tr" className="bg-[#E9B44C]">Turkish</option>
+                  <option value="it" className="bg-[#E9B44C]">Italian</option>
+                  <option value="pt" className="bg-[#E9B44C]">Portuguese</option>
                 </select>
               </label>
             </div>
           )}
         </div>
-
         {error && (
-          <div className="p-4 mb-4 text-red-300 bg-red-900/30 rounded-lg border border-red-700/30">
+          <div className={`p-4 mb-4 rounded-lg ${styles.bgSecondary} ${styles.textAccent} ${styles.borderColor} border`}>
             Transmission Breach: {error}
           </div>
-        )}
-
-        <div className="divide-y divide-teal-800/30">
-          {entries.map(entry => (
+        )} 
+        {/* Entries list */}
+        <div className={`divide-y ${styles.dividerColor}`}>
+        {entries.map(entry => (
             <div 
               key={entry.id} 
-              className="p-4 hover:bg-teal-900/20 transition-colors relative group"
+              id={`entry-${entry.id}`}
+              className={`p-5 transition-colors relative group ${styles.bgHover}`}
             >
-              <div className="absolute inset-0 bg-teal-900/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg border-l-4 border-teal-500"></div>
               <div className="flex space-x-3 relative z-10">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
-                    <button
-                      className="flex items-center space-x-2 hover:text-teal-400 transition-colors"
-                      onMouseEnter={() => handleMouseEnter(entry.content, translateTo)}
-                      onClick={() => readEntryContent(entry.content, translateTo)}
+                  <span className={`flex items-center text-xs sm:text-sm transition-colors ${styles.textSecondary}`}>
+                                        {/* themes button */}
+                  <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
+                        <button
+                          className={`flex items-center justify-center w-5 h-2 squared-full text-xs ${themeColors[entry.theme_name.trim()] || 'bg-gray-500'}`}
+                          title={`View all entries for ${entry.theme_name}`}
+                        >
+                        </button> 
+                      </Link> 
+                      {/* Date time */}
+                      <span className="ml-2">
+                        {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, {''}
+                        {new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                      </span>
+                      {/* translate button */}
+                      <button
+                        className={`transition-opacity ml-2 hover:opacity-80 ${styles.textSecondary}`}
+                        onMouseEnter={() => handleMouseEnter(entry.content, translateTo)}
+                        onClick={() => readEntryContent(entry.content, translateTo)}
+                      >
+                        <SpeakerWaveIcon className="w-6 h-4" />
+                      </button>
+                    </span>
+                    {/* expand button */}
+                    <button 
+                      onClick={() => toggleExpand(entry.id)} 
+                      className={`text-sm transition-opacity hover:opacity-80 ${styles.textSecondary}`}
+                      title={expandedIds.has(entry.id) ? 'show less' : 'expand text'}
                     >
-                      <SpeakerWaveIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-300" />
+                      {expandedIds.has(entry.id) ? <ChevronUp /> : <MoreHorizontal />}
                     </button>
-                    <MoreHorizontal className="w-5 h-5 text-teal-500 opacity-50 group-hover:opacity-100 transition-opacity" />
                   </div>
+                    {/* text */}
+                  <p className={`mt-3 whitespace-pre-wrap text-sm leading-loose ${styles.textPrimary} font-light tracking-wide`}>
+                  {expandedIds.has(entry.id)
+                      ? entry.content
+                      : entry.content.slice(0, 280) + (entry.content.length > 280 ? '...' : '')}
+                  </p>       
 
-                  <p className="mt-2 text-white whitespace-pre-wrap text-sm leading-relaxed font-mono">
-                    {entry.content}
-                  </p>
+                  <div className={`mt-3 flex justify-between items-center opacity-70 ${styles.textSecondary}`}>
+                  <span className="flex items-center space-x-2 transition-opacity hover:opacity-80">
+                    {/* threads button */}
+                  {entry.thread_id && (
+                        <Link href={`/dashboard/groups/${entry.thread_id}`} passHref> 
+                          <button 
+                            className={`transition-opacity hover:opacity-80 ${styles.textSecondary}`}
+                            title={entry.thread_title || ''}
+                          >
+                            <UserGroupIcon className="w-4 h-4" />
+                          </button>
+                        </Link>
+                      )} {''}
+                    </span>
 
-                  <div className="mt-3 flex justify-between items-center text-teal-400 text-opacity-70">
-                    <span className="flex items-center space-x-2 hover:text-teal-300 transition-colors">
-                      <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span className="text-xs sm:text-sm">
-                        {new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </span>
-                    <span className="text-xs sm:text-sm">
-                      {new Date(entry.created_at).toLocaleDateString()}
-                    </span>
-                    {entry.location && (
-                      <span className="flex items-center space-x-1 hover:text-teal-300 transition-colors">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-xs">{entry.city}</span>
-                      </span>
+                    {entry.city && ( 
+                      <Link href={`/dashboard/kiez/${entry.city}`} passHref>
+                        <button 
+                          title={`View all entries for ${entry.city}`}
+                          className="flex items-center space-x-1 transition-opacity hover:opacity-80"
+                        >
+                          <MapPin className="w-4 h-4" />
+                          <span className="text-xs">{entry.city}</span>
+                        </button>                 
+                      </Link>
                     )}
                   </div>
                 </div>
               </div>
             </div>
           ))}
+          
           {loading && (
-            <div className="p-4 text-teal-500 text-center">
-              Scanning underwater data streams... Retrieving logs...
-            </div>
+            <div className={`p-4 text-center ${styles.textAccent}`}>
+              {styles.loadingText}
+              </div>
           )}
+          
           {!hasMore && (
-            <div className="p-4 text-teal-600 text-center">
-             You've reached the shore of your memories! 🌊
-          </div>
+            <div className={`p-4 text-center ${styles.textSecondary}`}>
+              {styles.endText}
+              </div>
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { 
-            transform: translateY(0);
-            opacity: 0.1;
-          }
-          50% { 
-            transform: translateY(-20px);
-            opacity: 0.3;
-          }
-        }
-        body {
-          background-color: #0a1428;
-        }
-        ::selection {
-          background-color: rgba(0, 255, 255, 0.2);
-        }
-      `}</style>
+    </div>
     </div>
   );
 };
+
 
 export default PersonalComp;
 

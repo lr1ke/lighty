@@ -1,7 +1,8 @@
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { ThemeProvider } from '@/app/context/ThemeContext';
-// import ThemeManager from '@/app/context/ThemeManager';
+import { Toaster } from 'react-hot-toast';
+
 
 export default function RootLayout({
   children,
@@ -12,8 +13,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          {/* <ThemeManager /> */}
           {children}
+          <Toaster position="top-right" reverseOrder={false} />
+
         </ThemeProvider>
       </body>
     </html>

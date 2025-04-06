@@ -15,7 +15,8 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
       case 'daydream':
         return 'bg-white'; // White background for daydream theme
       case 'ocean':
-        return 'bg-[#0a1428]';     
+        // return 'bg-[#0a1428]';     
+        return 'bg-[#0c2040]'; 
       case 'space':
         return 'bg-black';
       case 'shell':
