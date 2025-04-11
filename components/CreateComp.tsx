@@ -11,16 +11,7 @@ import { getVerifiedLocation } from '@/utils/getVerifiedLocation';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 import { lusitana } from '@/app/ui/fonts';
-import { Sparkles } from 'lucide-react';
-import { Toaster } from 'react-hot-toast';
 
-
-
-
-interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
 
 interface Prompt {
   title: string;
@@ -96,6 +87,8 @@ const CreateComp: React.FC = () => {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 1000;
   const { themeColors, styles } = useTheme();
+
+
 
   // set length of text
   useEffect(() => {
@@ -219,17 +212,16 @@ const CreateComp: React.FC = () => {
 
     try {
       const locationData = await getVerifiedLocation();
-
       const payload = {
         content,
         theme_id: themeId,
-        location: locationData?.location || null,
-        city: locationData?.city || null,
-        state: locationData?.state || null,
-        country: locationData?.country || null,
-        latitude: locationData?.coordinates?.latitude || null,
-        longitude: locationData?.coordinates?.longitude || null,
+        location: locationData?.location || { latitude: null, longitude: null },
+        city: locationData?.city || 'Unknown',
+        state: locationData?.state || 'Unknown',
+        country: locationData?.country || 'Unknown',
       };
+      
+      
       const res = await fetch('/api/entries/create', {
         method: 'POST',
         headers: {
@@ -239,7 +231,8 @@ const CreateComp: React.FC = () => {
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to create entry');
+        const errorMessage = errorData.error || errorData.message || 'Failed to create entry';
+        throw new Error(errorMessage);
       }
       toast.success('Entry saved successfully!');
       router.push('/dashboard');

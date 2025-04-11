@@ -2,10 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Define your three themes
 export type ThemeOption = 'ocean' | 'space' | 'shell' | 'dreamy' | 'daydream';
 
-// Define theme colors for each theme
 export const themeColorSets = {
   ocean: {
     'morning': 'bg-purple-800 text-purple-800', // Morning sea mist
@@ -49,20 +47,18 @@ export const themeColorSets = {
   }
 };
 
-// Define theme-specific Tailwind classes
 export const themeStyles = {
   ocean: {
-    // Background colors - updated to match exactly
-    bgPrimary: 'bg-[#0a1428]',
+    bgPrimary: 'bg-[#0c2040]',
     // bgSecondary: 'bg-[#0a1428]',
-    bgSecondary: 'bg-[#0c2040]',
+    bgSecondary: 'bg-[#0a3c5e]',
     bgTertiary: 'bg-[#0a3c5e]',
     bgHover: 'hover:bg-teal-900/20',
     
     // Text colors - updated to match exactly
     textPrimary: 'text-white',
-    textSecondary: 'text-teal-400',
-    textAccent: 'text-teal-400',
+    textSecondary: 'text-teal-500',
+    textAccent: 'text-teal-500',
     
     // Border colors - updated to match exactly
     borderColor: 'border-teal-800/30',
@@ -145,19 +141,17 @@ export const themeStyles = {
     // Hover states
     hoverText: 'hover:text-[#FF6B91]', // Hover text becomes coral pink
     
-    // Theme-specific elements
     icon: '🌌',
     loadingText: 'Drifting through dreams... Collecting ethereal thoughts...',
     endText: 'You\'ve reached the edge of the dreamscape! ✨'
   },
   daydream: {
-    // Background colors - bright version with more pink/coral and yellow tones
     bgPrimary: 'bg-[#F8FDFF]', // Very light blue-white background
-    bgSecondary: 'bg-[#FFF5F7]', // Very light pink tint
+    bgSecondary: 'bg-[rgba(92,232,214,0.2)]', // Very light pink tint
     bgTertiary: 'bg-[#FFF9E6]', // Light yellow tint
     bgHover: 'hover:bg-[#FF6B91]/20', // Coral pink with transparency for hover
     bgActive: 'bg-[#FF6B91]/20', // Coral pink with transparency for active state
-    bgHoverStatic: 'bg-[rgba(255,107,145,0.2)]', // Coral pink with transparency as static bg
+    bgHoverStatic: 'bg-[hsla(256, 26.70%, 47.10%, 0.20)]', // Coral pink with transparency as static bg
     
     // Text colors
     textPrimary: 'text-[#1A1A2E]', // Dark blue text
@@ -182,7 +176,7 @@ interface ThemeContextType {
   theme: ThemeOption;
   setTheme: (theme: ThemeOption) => void;
   themeColors: Record<string, string>;
-  styles: typeof themeStyles.ocean;
+  styles: typeof themeStyles.dreamy;
 }
 
 // Create the context with a default value

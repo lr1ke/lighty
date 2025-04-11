@@ -195,7 +195,7 @@ const GlobalComp: React.FC = () => {
                     </button>
                   </div>
                     {/* text */}
-                  <p className={`mt-3 whitespace-pre-wrap text-sm leading-loose ${styles.textPrimary} font-light tracking-wide`}>
+                  <p className={`mt-3 whitespace-pre-wrap text-sm leading-loose ${styles.textPrimary} hover: ${styles.bgHoverStatic} font-light tracking-wide`}>
                   {expandedIds.has(entry.id)
                       ? entry.content
                       : entry.content.slice(0, 280) + (entry.content.length > 280 ? '...' : '')}
