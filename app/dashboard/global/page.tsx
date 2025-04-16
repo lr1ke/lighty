@@ -195,7 +195,7 @@ const GlobalComp: React.FC = () => {
                     </button>
                   </div>
                     {/* text */}
-                  <p className={`mt-3 whitespace-pre-wrap text-sm leading-loose ${styles.textPrimary} hover: ${styles.bgHoverStatic} font-light tracking-wide`}>
+                  <p className={`mt-3 whitespace-pre-wrap text-sm leading-loose ${styles.textPrimary} hover:${styles.bgHoverStatic} font-light tracking-wide`}>
                   {expandedIds.has(entry.id)
                       ? entry.content
                       : entry.content.slice(0, 280) + (entry.content.length > 280 ? '...' : '')}
@@ -217,8 +217,9 @@ const GlobalComp: React.FC = () => {
                     </span>
 
                     {entry.city && ( 
-                      <Link href={`/dashboard/kiez/${entry.city}`} passHref>
-                        <button 
+                      // <Link href={`/dashboard/kiez/${entry.city}`} passHref>
+                      <Link href={`/dashboard/kiez/${encodeURIComponent(entry.city)}`}>
+                      <button 
                           title={`View all entries for ${entry.city}`}
                           className="flex items-center space-x-1 transition-opacity hover:opacity-80"
                         >

@@ -15,7 +15,6 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <Toaster position="top-right" reverseOrder={false} />
-
         </ThemeProvider>
       </body>
     </html>

@@ -162,7 +162,7 @@ const CreateComp: React.FC = () => {
     
     setIsTranslating(true);
     try {
-      const translation = await translateText(content, 'en');
+      const translation = await translateText(content);
       if (translation) {
         setContent(translation);
       }

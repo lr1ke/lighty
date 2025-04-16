@@ -4,6 +4,24 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type ThemeOption = 'ocean' | 'space' | 'shell' | 'dreamy' | 'daydream';
 
+interface ThemeStyle {
+  bgPrimary: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  bgHover: string;
+  bgActive: string;
+  bgHoverStatic: string;
+  textPrimary: string;
+  textSecondary: string;
+  textAccent: string;
+  borderColor: string;
+  dividerColor: string;
+  hoverText: string;
+  icon: string;
+  loadingText: string;
+  endText: string;
+}
+
 export const themeColorSets = {
   ocean: {
     'morning': 'bg-purple-800 text-purple-800', // Morning sea mist
@@ -47,13 +65,15 @@ export const themeColorSets = {
   }
 };
 
-export const themeStyles = {
+export const themeStyles: Record<ThemeOption, ThemeStyle> = {
   ocean: {
     bgPrimary: 'bg-[#0c2040]',
     // bgSecondary: 'bg-[#0a1428]',
     bgSecondary: 'bg-[#0a3c5e]',
     bgTertiary: 'bg-[#0a3c5e]',
     bgHover: 'hover:bg-teal-900/20',
+    bgActive: 'bg-teal-900/20',
+    bgHoverStatic: 'bg-teal-900/20',
     
     // Text colors - updated to match exactly
     textPrimary: 'text-white',
@@ -78,6 +98,8 @@ export const themeStyles = {
     bgSecondary: 'bg-black',
     bgTertiary: 'bg-black',
     bgHover: 'hover:bg-gray-900',
+    bgActive: 'bg-[#C9A648]/20',
+    bgHoverStatic: 'bg-[#C9A648]/20',
     
     // Text colors
     textPrimary: 'text-white',
@@ -102,6 +124,8 @@ export const themeStyles = {
     bgSecondary: 'bg-white',
     bgTertiary: 'bg-[#E6D6AC]',
     bgHover: 'hover:bg-[#E9B44C]/20',
+    bgActive: 'bg-[#E9B44C]/20',
+    bgHoverStatic: 'bg-[#E9B44C]/20',
     
     // Text colors - updated to match exactly with your design
     textPrimary: 'text-[#121A0F]',
@@ -176,7 +200,8 @@ interface ThemeContextType {
   theme: ThemeOption;
   setTheme: (theme: ThemeOption) => void;
   themeColors: Record<string, string>;
-  styles: typeof themeStyles.dreamy;
+  // styles: typeof themeStyles.dreamy;
+  styles: ThemeStyle; 
 }
 
 // Create the context with a default value

@@ -19,6 +19,7 @@ const ThemeEntriesPage: React.FC = () => {
   useEffect(() => {
     const fetchEntries = async () => {
       if (!themeId) return;
+      console.log("Fetching entries for themeId:", themeId);
       setLoading(true);
       try {
         const res = await fetch(`/api/entries/get/themes/${themeId}`);
