@@ -21,23 +21,29 @@ export default function Page() {
       
       <div className={`max-w-3xl mx-auto ${styles.bgSecondary} rounded-lg p-6 shadow-lg ${styles.borderColor} border`}>
         <p className={`${styles.textPrimary} mb-4`}>
-          Welcome to our collective journaling space. Here you can record your thoughts, experiences, and reflections.
+          This is our collective journaling space. Here you can record your thoughts, experiences, and reflections.
         </p>
         
-        <p className={`${styles.textPrimary} mb-4`}>
-          Choose the colors that suits your mood using the theme switcher in the top right corner.
+        <p className={`${styles.textSecondary} mb-4`}>
+        How to uses this diary        
         </p>
-        
         <ul className={`list-disc pl-5 ${styles.textPrimary} mb-4`}>
           <li className="mb-2">Create new entries to capture and share your thoughts</li>
           <li className="mb-2">View your personal entries to reflect on past experiences</li>
           <li className="mb-2">Explore global entries to connect with others</li>
         </ul>
         
-        <p className={`${styles.textSecondary} italic`}>
-          "Some quote..."
-          {/* "The journal is a vehicle for my sense of selfhood. It represents me as emotionally and spiritually independent." — Susan Sontag */}
+        <p className={`${styles.textSecondary} py-12 italic`}>
+          "Words, works, worlds" - let's co-create a universe of thoughts and ideas together.
         </p>
+
+        <p className={`${styles.textSecondary} mb-4`}>
+            Guidelines        </p>
+        <ul className={`list-disc pl-5 ${styles.textPrimary} mb-4`}>
+          <li className="mb-2">Don't sign your diary entries</li>
+          <li className="mb-2">Don't use real names</li>
+          <li className="mb-2">No product placing or political propaganda</li>
+        </ul>
       </div>
     </main>
   );
