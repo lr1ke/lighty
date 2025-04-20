@@ -12,11 +12,6 @@ export async function GET(req: NextRequest, context: { params: { themeId: string
       return NextResponse.json({ error: 'Missing theme ID' }, { status: 400 });
     }
 
-    // const entries = await sql`
-    //   SELECT id, content, created_at, theme_id FROM entries
-    //   WHERE theme_id = ${themeId}
-    //   ORDER BY created_at DESC;
-    // `;
 
     const entries = await sql`
     SELECT entries.id, entries.content, entries.created_at, entries.theme_id, themes.name AS theme_name

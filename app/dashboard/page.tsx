@@ -5,7 +5,7 @@ import ThemeSwitcher from '@/app/context/ThemeSwitcher';
 import { useTheme } from '@/app/context/ThemeContext';
 
 export default function Page() {
-  const { theme, styles } = useTheme();
+  const { styles } = useTheme();
   
   return (
     <main className={`p-6 ${styles.bgPrimary} min-h-screen ${styles.textPrimary}`}>

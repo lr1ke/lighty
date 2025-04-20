@@ -94,7 +94,6 @@ const GlobalComp: React.FC = () => {
 
   return (
     <div className="relative min-h-screen">
-
     <div className={`max-w-2xl mx-auto  overflow-hidden ${styles.bgPrimary}`}>
       <div className="relative z-10">
         <div className={`top-0 z-20 ${styles.bgSecondary} bg-opacity-90 backdrop-blur-sm ${styles.borderColor} border-b shadow-lg`}>
@@ -217,7 +216,6 @@ const GlobalComp: React.FC = () => {
                     </span>
 
                     {entry.city && ( 
-                      // <Link href={`/dashboard/kiez/${entry.city}`} passHref>
                       <Link href={`/dashboard/kiez/${encodeURIComponent(entry.city)}`}>
                       <button 
                           title={`View all entries for ${entry.city}`}

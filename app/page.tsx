@@ -34,14 +34,14 @@ export default function Page() {
         </div>
         <div className="flex items-center justify-center rounded-lg p-6 md:w-3/5 md:px-28 md:py-12 bg-[#0c2040]">
         <Image 
-  src="/pic1.jpeg" 
-  alt="Star" 
-  layout="responsive" 
-  width={16} 
-  height={9} 
-  className="rounded-lg shadow-lg" 
-/>
-</div>
+          src="/pic1.jpeg" 
+          alt="Star" 
+          layout="responsive" 
+          width={16} 
+          height={9} 
+          className="rounded-lg shadow-lg" 
+        />
+      </div>
       </div>
     </main>
   );

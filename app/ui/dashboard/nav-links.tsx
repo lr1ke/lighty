@@ -2,25 +2,26 @@
 
 import {
   UserGroupIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import clsx from 'clsx';
 import { useTheme } from '@/app/context/ThemeContext';
+import { Pencil, Home } from 'lucide-react'; // Lucide Icons
+
 
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
+  { name: 'Home', href: '/dashboard', icon: Home },
   {
     name: 'Create',
     href: '/dashboard/create',
-    icon: DocumentDuplicateIcon,
+    icon: Pencil,
   },
   {
     name: 'Personal',
     href: '/dashboard/personal',
-    icon: DocumentDuplicateIcon,
+    icon: UserIcon,
   },
   {
     name: 'Global',
