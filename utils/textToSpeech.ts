@@ -12,17 +12,20 @@ const audioCache = new Map<string, string>(); // Cache audio URLs by key
 const ALL_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"];
 
 export const LANGUAGES: Record<string, { name: string }> = {
-  en: { name: "English" },
-  de: { name: "German" },
-  es: { name: "Spanish" },
-  fr: { name: "French" },
-  ru: { name: "Russian" },
-  zh: { name: "Chinese (Mandarin)" },
-  hi: { name: "Hindi" },
   ar: { name: "Arabic" },
-  tr: { name: "Turkish" },
+  zh: { name: "Chinese (Mandarin)" },
+  en: { name: "English" },
+  fr: { name: "French" },
+  de: { name: "German" },
+  he: { name: "Hebrew" },
+  hi: { name: "Hindi" },
   it: { name: "Italian" },
+  ja: { name: "Japanese" },
   pt: { name: "Portuguese" },
+  ru: { name: "Russian" },
+  es: { name: "Spanish" },
+  tr: { name: "Turkish" },
+
 };
 
 const detectLanguage = (text: string): string => {
@@ -32,6 +35,7 @@ const detectLanguage = (text: string): string => {
   if (/[áéíóúñ]/i.test(text)) return "es";
   if (/[àâêîôûç]/i.test(text)) return "fr";
   if (/[ऀ-ॿ]/.test(text)) return "hi";
+  if (/[\u0590-\u05FF]/.test(text)) return "he";
   if (/[ء-ي]/.test(text)) return "ar";
   if (/[çşğüöı]/i.test(text)) return "tr";
   if (/[àèéìòù]/i.test(text)) return "it";

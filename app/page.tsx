@@ -20,9 +20,9 @@ export default function Page() {
       
           <p className={`${lusitana.className} text-xl text-teal-500 md:text-3xl md:leading-normal`}>
             <strong>Welcome to Lighty.</strong> This is a collective diary, a collaborative writing experiment, 
-            a fully decentralized journaling interface, 
-              an inquiry what's behind the slogan <a href="  https://direct.mit.edu/books/edited-volume/4698/chapter-abstract/215211/Words-Works-Worlds?redirectedFrom=PDF " className="text-white"> "words, works, worlds" </a> 
-              and a what if the stars were made by us? 
+            a decentralized journaling interface, 
+              an inquiry into the meaning behind the slogan <a href="  https://direct.mit.edu/books/edited-volume/4698/chapter-abstract/215211/Words-Works-Worlds?redirectedFrom=PDF " className="text-white"> "words, works, worlds" </a> 
+              and a question: what if the stars were made by us? 
               
           </p>
           <Link
