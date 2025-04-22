@@ -1776,7 +1776,7 @@
 
 // const KiezPage: React.FC = () => {
 //   const [entries, setEntries] = useState<Entry[]>([]);
-//   const [cityInfo, setCityInfo] = useState<{ name: string; state?: string; country?: string } | null>(null);   
+//   const [cityInfo, setCityInfo] = useState<{ name: string; state?: string; } | null>(null);   
 //   const [loading, setLoading] = useState<boolean>(false);
 //   const [error, setError] = useState<string>("");
 //   const [hasMore, setHasMore] = useState<boolean>(true);

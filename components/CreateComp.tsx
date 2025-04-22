@@ -87,7 +87,8 @@ const CreateComp: React.FC = () => {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 1000;
   const { themeColors, styles } = useTheme();
-
+  const [locationData, setLocationData] = useState<any>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState<boolean>(false);
 
 
   // set length of text
@@ -110,6 +111,24 @@ const CreateComp: React.FC = () => {
     };
     fetchThemes();
   }, []);
+
+    // Fetch location when component mounts
+    useEffect(() => {
+      const fetchLocation = async () => {
+        setIsLoadingLocation(true);
+        try {
+          const data = await getVerifiedLocation();
+          console.log('Location fetched on mount:', data);
+          setLocationData(data);
+        } catch (error) {
+          console.error('Error fetching location:', error);
+        } finally {
+          setIsLoadingLocation(false);
+        }
+      };
+      
+      fetchLocation();
+    }, []);
 
   //audio transcription
   useEffect(() => {
@@ -211,15 +230,21 @@ const CreateComp: React.FC = () => {
     setError('');
 
     try {
-      const locationData = await getVerifiedLocation();
+      const location = locationData || await getVerifiedLocation();
+      console.log('Location data received:', locationData); 
+
       const payload = {
         content,
         theme_id: themeId,
-        location: locationData?.location || { latitude: null, longitude: null },
-        city: locationData?.city || 'Unknown',
-        state: locationData?.state || 'Unknown',
-        country: locationData?.country || 'Unknown',
+        location: location ? {
+          latitude: location.location.latitude,
+          longitude: location.location.longitude,
+          city: location.city || 'Unknown',
+          state: location.state || 'Unknown'
+        } : null
       };
+      
+      console.log('Sending payload:', payload); 
       
       
       const res = await fetch('/api/entries/create', {

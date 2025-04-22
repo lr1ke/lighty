@@ -1,5 +1,3 @@
-
-
 import { toast } from 'react-hot-toast';
 
 export interface VerifiedLocation {
@@ -9,71 +7,253 @@ export interface VerifiedLocation {
   };
   city: string;
   state: string;
-  country: string;
 }
 
-export const getVerifiedLocation = async (): Promise<VerifiedLocation | null> => {
+interface VerifiedLocationOptions {
+  showToasts?: boolean;
+}
+
+// Calculate distance between two geographical points using Haversine formula
+function calculateDistance(
+  loc1: { latitude: number; longitude: number },
+  loc2: { latitude: number; longitude: number }
+): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (loc2.latitude - loc1.latitude) * Math.PI / 180;
+  const dLon = (loc2.longitude - loc1.longitude) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(loc1.latitude * Math.PI / 180) * Math.cos(loc2.latitude * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in km
+}
+
+export const getVerifiedLocation = async (options?: VerifiedLocationOptions): Promise<VerifiedLocation | null> => {
+  const showToasts = options?.showToasts !== false;
+
   const getBrowserLocation = async (): Promise<VerifiedLocation | null> => {
     return new Promise((resolve) => {
-      if (!navigator.geolocation) return resolve(null);
+      if (!navigator.geolocation) {
+        console.info('Geolocation API not supported by this browser');
+        return resolve(null);
+      }
+
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
+            console.log('Browser location granted:', position.coords);
             const { latitude, longitude } = position.coords;
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-            const data = await res.json();
-            const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.municipality || 'Unknown';
-            const state = data.address.state || 'Unknown';
-            const country = data.address.country || 'Unknown';
-
-            resolve({
+            
+            // Default location with coordinates even if reverse geocoding fails
+            const defaultLocation = {
               location: { latitude, longitude },
-              city,
-              state,
-              country,
-            });
-          } catch {
+              city: 'Unknown',
+              state: 'Unknown',
+            };
+            
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+                { headers: { 'Accept-Language': 'en' } } // Ensure English results
+              );
+              
+              if (!res.ok) {
+                console.warn(`Nominatim API error: ${res.status}`, await res.text());
+                return resolve(defaultLocation);
+              }
+              
+              const data = await res.json();
+              console.log('Nominatim response:', data);
+              
+              // More robust address extraction with fallbacks
+              const address = data.address || {};
+              const city = 
+                address.city || 
+                address.town || 
+                address.village || 
+                address.suburb || 
+                address.municipality || 
+                address.county ||
+                (data.display_name ? data.display_name.split(',')[0] : 'Unknown');
+              
+              const state = 
+                address.state || 
+                address.region || 
+                address.county || 
+                'Unknown';
+
+              console.log(`Extracted location: ${city}, ${state}`);
+              
+              resolve({
+                location: { latitude, longitude },
+                city,
+                state,
+              });
+            } catch (error) {
+              console.error('Error in reverse geocoding:', error);
+              resolve(defaultLocation);
+            }
+          } catch (error) {
+            console.error('Error in browser geolocation:', error);
             resolve(null);
           }
         },
-        () => resolve(null)
+        (error) => {
+          console.warn(`Geolocation permission error (${error.code}): ${error.message}`);
+          resolve(null);
+        },
+        { 
+          timeout: 30000, // Increased from 10000 to 30000 (30 seconds) for better reliability
+          enableHighAccuracy: true,
+          maximumAge: 60000  // Accept cached positions up to 1 minute old
+        }
       );
     });
   };
 
   const getIPLocation = async (): Promise<VerifiedLocation> => {
-    const res = await fetch('https://ipapi.co/json/');
-    // const res = await fetch('https://ipinfo.io/json?token=YOUR_TOKEN'); for production 
-
-    const data = await res.json();
-    return {
-      location: {
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
-      },
-      city: data.city || 'Unknown',
-      state: data.region || 'Unknown',
-      country: data.country_name || 'Unknown',
-    };
+    try {
+      console.log('Fetching IP-based location');
+      const res = await fetch('https://ipapi.co/json/');
+      // const res = await fetch('https://ipinfo.io/json?token=YOUR_TOKEN'); // For production
+      
+      if (!res.ok) {
+        throw new Error(`IP geolocation API error: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log('IP location response:', data);
+      
+      return {
+        location: {
+          latitude: parseFloat(data.latitude),
+          longitude: parseFloat(data.longitude),
+        },
+        city: data.city || 'Unknown',
+        state: data.region || 'Unknown',
+      };
+    } catch (error) {
+      console.error('Error fetching IP location:', error);
+      return {
+        location: { latitude: 0, longitude: 0 },
+        city: 'Unknown',
+        state: 'Unknown',
+      };
+    }
   };
 
   try {
+    console.log('Starting location verification process');
+    
+    // Get both locations in parallel
     const [browserLoc, ipLoc] = await Promise.all([
-      getBrowserLocation().catch(() => null),
-      getIPLocation(),
+      getBrowserLocation().catch(err => {
+        console.error('Browser location error:', err);
+        return null;
+      }),
+      getIPLocation().catch(err => {
+        console.error('IP location error:', err);
+        return {
+          location: { latitude: 0, longitude: 0 },
+          city: 'Unknown',
+          state: 'Unknown',
+        };
+      }),
     ]);
+    
+    console.log('Browser location result:', browserLoc);
+    console.log('IP location result:', ipLoc);
 
-    if (browserLoc) {
-      if (browserLoc.city && ipLoc.city && !ipLoc.city.includes(browserLoc.city)) {
-        toast('Location mismatch detected. Using network location.', { icon: '⚠️' });
-        return ipLoc;
+    // If browser location is available
+    if (browserLoc && 
+        browserLoc.location.latitude !== 0 && 
+        browserLoc.location.longitude !== 0) {
+      
+      // Check for significant location discrepancies
+      if (ipLoc && 
+          ipLoc.location.latitude !== 0 && 
+          ipLoc.location.longitude !== 0) {
+        
+        const distance = calculateDistance(browserLoc.location, ipLoc.location);
+        console.log(`Distance between browser and IP locations: ${distance.toFixed(2)} km`);
+        
+        // Compare city names (case-insensitive)
+        const browserCity = browserLoc.city.toLowerCase();
+        const ipCity = ipLoc.city.toLowerCase();
+        
+        // If the distance is significant AND the cities don't match at all
+        if (distance > 50 && 
+            browserCity !== 'unknown' && 
+            ipCity !== 'unknown' && 
+            !browserCity.includes(ipCity) && 
+            !ipCity.includes(browserCity)) {
+          
+          console.log('Location mismatch detected between browser and IP');
+          
+          // Only show toast if showToasts is true
+          if (showToasts) {
+            toast('Location appears to be different from your network location.', { 
+              id: 'location-mismatch-toast', // Add an ID to prevent duplicates
+              icon: '⚠️',
+              duration: 5000
+            });
+          }
+          
+          // Still use browser location as user explicitly granted permission
+          return browserLoc;
+        }
       }
+      
+      // If no major discrepancy or IP location unavailable, use browser location
       return browserLoc;
     }
 
-    toast('Browser location unavailable. Using network location.', { icon: '⚠️' });
-    return ipLoc;
-  } catch {
-    throw new Error('Unable to determine location');
+    // If browser location not available, use IP location
+    if (ipLoc) {
+      if (showToasts) {
+        toast('Browser location unavailable. Using network location.', { 
+          id: 'location-fallback-toast',
+          icon: 'ℹ️',
+          duration: 4000
+        });
+      }
+      return ipLoc;
+    }
+
+    // If all methods fail
+    console.error('All geolocation methods failed');
+    
+    // FIXED: Removed duplicate toast - only show one toast message
+    if (showToasts) {
+      toast('Unable to determine your location.', { 
+        id: 'location-error-toast',
+        icon: '❌',
+        duration: 5000 
+      });
+    }
+    
+    return {
+      location: { latitude: 0, longitude: 0 },
+      city: 'Unknown',
+      state: 'Unknown',
+    };
+    
+  } catch (error) {
+    console.error('Error in location verification:', error);
+    
+    if (showToasts) {
+      toast('Location detection error. Please try again later.', { 
+        id: 'location-error-general-toast',
+        icon: '❌',
+        duration: 5000 
+      });
+    }
+    
+    return {
+      location: { latitude: 0, longitude: 0 },
+      city: 'Unknown',
+      state: 'Unknown',
+    };
   }
 };
