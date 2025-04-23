@@ -80,15 +80,9 @@ const CreateComp: React.FC = () => {
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
   const [selectedThemeName, setSelectedThemeName] = useState<string>('');
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [location, setLocation] = useState('');
-  const [city, setCity] = useState('');
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 1000;
   const { themeColors, styles } = useTheme();
-  const [locationData, setLocationData] = useState<any>(null);
-  const [isLoadingLocation, setIsLoadingLocation] = useState<boolean>(false);
 
 
   // set length of text
@@ -112,23 +106,23 @@ const CreateComp: React.FC = () => {
     fetchThemes();
   }, []);
 
-    // Fetch location when component mounts
-    useEffect(() => {
-      const fetchLocation = async () => {
-        setIsLoadingLocation(true);
-        try {
-          const data = await getVerifiedLocation();
-          console.log('Location fetched on mount:', data);
-          setLocationData(data);
-        } catch (error) {
-          console.error('Error fetching location:', error);
-        } finally {
-          setIsLoadingLocation(false);
-        }
-      };
+    // // Fetch location when component mounts
+    // useEffect(() => {
+    //   const fetchLocation = async () => {
+    //     setIsLoadingLocation(true);
+    //     try {
+    //       const data = await getVerifiedLocation();
+    //       console.log('Location fetched on mount:', data);
+    //       setLocationData(data);
+    //     } catch (error) {
+    //       console.error('Error fetching location:', error);
+    //     } finally {
+    //       setIsLoadingLocation(false);
+    //     }
+    //   };
       
-      fetchLocation();
-    }, []);
+    //   fetchLocation();
+    // }, []);
 
   //audio transcription
   useEffect(() => {
@@ -230,8 +224,8 @@ const CreateComp: React.FC = () => {
     setError('');
 
     try {
-      const location = locationData || await getVerifiedLocation();
-      console.log('Location data received:', locationData); 
+      const location =  await getVerifiedLocation();
+      console.log('Location data received:', location); 
 
       const payload = {
         content,
@@ -260,7 +254,7 @@ const CreateComp: React.FC = () => {
         throw new Error(errorMessage);
       }
       toast.success('Entry saved successfully!');
-      router.push('/dashboard');
+      // router.push('/dashboard/global');
       // router.refresh();
       setContent('');
       setThemeId('');

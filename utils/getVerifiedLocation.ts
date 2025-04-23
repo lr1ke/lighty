@@ -166,65 +166,99 @@ export const getVerifiedLocation = async (options?: VerifiedLocationOptions): Pr
     console.log('IP location result:', ipLoc);
 
     // If browser location is available
-    if (browserLoc && 
-        browserLoc.location.latitude !== 0 && 
-        browserLoc.location.longitude !== 0) {
+    // if (browserLoc && 
+    //     browserLoc.location.latitude !== 0 && 
+    //     browserLoc.location.longitude !== 0) {
       
       // Check for significant location discrepancies
-      if (ipLoc && 
-          ipLoc.location.latitude !== 0 && 
-          ipLoc.location.longitude !== 0) {
+      // if (ipLoc && 
+      //     ipLoc.location.latitude !== 0 && 
+      //     ipLoc.location.longitude !== 0) {
         
-        const distance = calculateDistance(browserLoc.location, ipLoc.location);
-        console.log(`Distance between browser and IP locations: ${distance.toFixed(2)} km`);
+      //   const distance = calculateDistance(browserLoc.location, ipLoc.location);
+      //   console.log(`Distance between browser and IP locations: ${distance.toFixed(2)} km`);
         
-        // Compare city names (case-insensitive)
-        const browserCity = browserLoc.city.toLowerCase();
-        const ipCity = ipLoc.city.toLowerCase();
+    //     // Compare city names (case-insensitive)
+    //     const browserCity = browserLoc.city.toLowerCase();
+    //     const ipCity = ipLoc.city.toLowerCase();
         
-        // If the distance is significant AND the cities don't match at all
-        if (distance > 50 && 
-            browserCity !== 'unknown' && 
-            ipCity !== 'unknown' && 
-            !browserCity.includes(ipCity) && 
-            !ipCity.includes(browserCity)) {
+    //     // If the distance is significant AND the cities don't match at all
+    //     if (distance > 50 && 
+    //         browserCity !== 'unknown' && 
+    //         ipCity !== 'unknown' && 
+    //         !browserCity.includes(ipCity) && 
+    //         !ipCity.includes(browserCity)) {
           
-          console.log('Location mismatch detected between browser and IP');
-          
-          // Only show toast if showToasts is true
-          if (showToasts) {
-            toast('Location appears to be different from your network location.', { 
-              id: 'location-mismatch-toast', // Add an ID to prevent duplicates
-              icon: '⚠️',
-              duration: 5000
-            });
-          }
-          
-          // Still use browser location as user explicitly granted permission
-          return browserLoc;
-        }
-      }
-      
-      // If no major discrepancy or IP location unavailable, use browser location
-      return browserLoc;
-    }
+    //       console.log('Location mismatch detected between browser and IP');
+    //       // Still use browser location as user explicitly granted permission
+    //       return browserLoc;
+    //     }
+    //   }
+    //   // If no major discrepancy or IP location unavailable, use browser location
+    //   return browserLoc;
+    // }
 
     // If browser location not available, use IP location
-    if (ipLoc) {
-      if (showToasts) {
-        toast('Browser location unavailable. Using network location.', { 
-          id: 'location-fallback-toast',
-          icon: 'ℹ️',
-          duration: 4000
-        });
-      }
-      return ipLoc;
-    }
+    // if (ipLoc) {
+    //   if (showToasts) {
+    //     toast('Browser location unavailable. Using network location.', { 
+    //       id: 'location-fallback-toast',
+    //       icon: 'ℹ️',
+    //       duration: 4000
+    //     });
+    //   }
+    //   return ipLoc;
+    // }
 
+    // Inside your getVerifiedLocation function, replace the browser location check with this:
+
+// If browser location is available
+if (browserLoc && 
+  browserLoc.location.latitude !== 0 && 
+  browserLoc.location.longitude !== 0) {
+
+// Check if IP location is also available for comparison
+if (ipLoc && 
+    ipLoc.location.latitude !== 0 && 
+    ipLoc.location.longitude !== 0) {
+  
+  const distance = calculateDistance(browserLoc.location, ipLoc.location);
+  console.log(`Distance between browser and IP locations: ${distance.toFixed(2)} km`);
+  
+  // SIMPLIFIED: Only check for extreme distance (>1500km)
+  if (distance > 1500) {
+    console.log('Very large location mismatch detected (>1500km). Using IP location.');
+    
+    if (showToasts) {
+      toast('Using network location due to significant location discrepancy.', { 
+        id: 'location-large-mismatch-toast',
+        icon: '🌍',
+        duration: 5000
+      });
+    }
+    
+    return ipLoc; // Use IP location only when distance exceeds 1500km
+  }
+}
+
+// In all other cases, use browser location
+return browserLoc;
+}
+
+// If browser location not available, use IP location
+if (ipLoc) {
+if (showToasts) {
+  toast('Browser location unavailable. Using network location.', { 
+    id: 'location-fallback-toast',
+    icon: 'ℹ️',
+    duration: 4000
+  });
+}
+return ipLoc;
+}
     // If all methods fail
     console.error('All geolocation methods failed');
     
-    // FIXED: Removed duplicate toast - only show one toast message
     if (showToasts) {
       toast('Unable to determine your location.', { 
         id: 'location-error-toast',
