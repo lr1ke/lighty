@@ -1,7 +1,4 @@
-// problems: the voice adds words to make text sound better, more coherent, not wanted!
-// takes too long to load
-// try: better separate the tranlate and read aloud functions, the tranlate button in the row under the content 
-// also translate not needed in personalComp but in collab and global, also in collab and global for every entry voice switch  
+// problematic: nine out of ten it's a male voice 
 
 
 import axios from "axios";

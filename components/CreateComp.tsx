@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, useCallback, FC } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useVoiceRecorder from '@/utils/useVoiceRecorder';
 import { transcribeAudio } from '@/utils/transcribeAudio';
@@ -43,7 +43,7 @@ const prompts: Prompt[] = [
   },
   {
     title: "Evening Reflection",
-    content: "What did I accomplish?\nWhat did I learn?\nOne little win, one challenge, one grateful moment.",
+    content: "What did I accomplish?\nWhat did I learn?\nOne thing that caused stress. One win. One thing I'm grateful for.",
     themeKey: "evening",
   },
   {
@@ -83,6 +83,8 @@ const CreateComp: React.FC = () => {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 1000;
   const { themeColors, styles } = useTheme();
+  const [recordingStatus, setRecordingStatus] = useState('');
+  const { isRecording, audioBlob, startRecording, stopRecording } = useVoiceRecorder();
 
 
   // set length of text
@@ -90,7 +92,6 @@ const CreateComp: React.FC = () => {
     setCharCount(content.length);
   }, [content]);
 
-  const { isRecording, audioBlob, startRecording, stopRecording } = useVoiceRecorder();
 
   // Fetch themes from the server
   useEffect(() => {
@@ -106,30 +107,28 @@ const CreateComp: React.FC = () => {
     fetchThemes();
   }, []);
 
-    // // Fetch location when component mounts
-    // useEffect(() => {
-    //   const fetchLocation = async () => {
-    //     setIsLoadingLocation(true);
-    //     try {
-    //       const data = await getVerifiedLocation();
-    //       console.log('Location fetched on mount:', data);
-    //       setLocationData(data);
-    //     } catch (error) {
-    //       console.error('Error fetching location:', error);
-    //     } finally {
-    //       setIsLoadingLocation(false);
-    //     }
-    //   };
-      
-    //   fetchLocation();
-    // }, []);
 
   //audio transcription
   useEffect(() => {
     if (audioBlob) {
+      console.log('Audio recorded:', audioBlob.size, 'bytes');
       handleTranscription();
+      // Don't set the status here, we'll handle it in the transcription function
     }
   }, [audioBlob]);
+
+  // clear redording status when the recording state changes
+  useEffect(() => {
+    // When recording stops and we're not transcribing, clear status
+    if (!isRecording && !isTranscribing) {
+      // Small delay to allow for natural transition
+      const timeout = setTimeout(() => {
+        setRecordingStatus('');
+      }, 1000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isRecording, isTranscribing]);
 
 // theme selection
   useEffect(() => {
@@ -148,21 +147,31 @@ const CreateComp: React.FC = () => {
     if (!audioBlob) return;
   
     setIsTranscribing(true);
+    setRecordingStatus('Transcribing...'); 
+
     try {
       const transcription = await transcribeAudio(audioBlob);
       if (transcription) {
         const newContent = content + (content ? '\n\n' : '') + transcription;
   
         if (newContent.length > MAX_CHARS) {
-          setContent(newContent.slice(0, MAX_CHARS)); // truncate
+          setContent(newContent.slice(0, MAX_CHARS)); 
           toast.error('Text exceeds maximum length and was truncated.');
         } else {
           setContent(newContent);
         }
+        setRecordingStatus('');
+
       }
     } catch (err: any) {
       toast.error('Failed to transcribe audio');
       console.error(err);
+      setRecordingStatus('Transcription failed');
+
+    // Auto-clear error message after 3 seconds
+    setTimeout(() => {
+      setRecordingStatus('');
+    }, 3000);
     } finally {
       setIsTranscribing(false);
     }
@@ -218,15 +227,11 @@ const CreateComp: React.FC = () => {
       setError('Please select a theme');
       return;
     }
-
-    
     setLoading(true);
     setError('');
-
     try {
       const location =  await getVerifiedLocation();
       console.log('Location data received:', location); 
-
       const payload = {
         content,
         theme_id: themeId,
@@ -237,9 +242,7 @@ const CreateComp: React.FC = () => {
           state: location.state || 'Unknown'
         } : null
       };
-      
       console.log('Sending payload:', payload); 
-      
       
       const res = await fetch('/api/entries/create', {
         method: 'POST',
@@ -267,6 +270,34 @@ const CreateComp: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Handle recording toggle
+  // For iOS Safari, we need to handle this synchronously within the click event
+  const handleRecordingToggle = useCallback(() => {
+    if (isRecording) {
+      console.log("Stopping recording...");
+      setRecordingStatus('Stopping...');
+      stopRecording();
+    } else {
+      console.log("Starting recording...");
+      setRecordingStatus('Starting...');
+      // For iOS Safari, we need to handle this synchronously within the click event
+      startRecording().catch(err => {
+        console.error('Recording error:', err);
+        setRecordingStatus(`Error: ${err.message}`);
+        toast.error('Could not start recording');
+      });
+    }
+  }, [isRecording, startRecording, stopRecording]);
+
+  // monitor recording status changes
+  useEffect(() => {
+    if (audioBlob) {
+      console.log('Audio recorded:', audioBlob.size, 'bytes');
+      setRecordingStatus('Transcribing...');
+      handleTranscription();
+    }
+  }, [audioBlob]);
 
   // switch placeholder text according to color theme 
   const { theme } = useTheme();
@@ -333,7 +364,7 @@ const CreateComp: React.FC = () => {
 
 {/* record button */}
                   <div className="flex items-center space-x-4 mt-4">
-                    <button
+                    {/* <button
                       className={`p-3 rounded-full text-white transition-all ${isRecording ? 'bg-[#C84A20]' : 'bg-[#8B3E2F] hover:bg-[#C84A20]'}`}
                       onClick={() => (isRecording ? stopRecording() : startRecording())}
                       type="button"
@@ -346,7 +377,44 @@ const CreateComp: React.FC = () => {
                       ) : (
                         <MicrophoneIcon className="w-6 h-6" />
                       )}
-                    </button>
+                    </button> */}
+                    {/* <button
+  className={`p-3 rounded-full text-white transition-all ${isRecording ? 'bg-[#C84A20]' : 'bg-[#8B3E2F] hover:bg-[#C84A20]'}`}
+  onClick={() => (isRecording ? stopRecording() : startRecording())}
+  type="button"
+  disabled={isTranscribing || charCount >= MAX_CHARS} // Changed from isRecording to isTranscribing
+>
+  {isRecording ? (
+    <StopIcon className="w-6 h-6" />
+  ) : isTranscribing ? (
+    <div className="animate-spin w-6 h-6 border-4 border-white border-t-transparent rounded-full"></div>
+  ) : (
+    <MicrophoneIcon className="w-6 h-6" />
+  )}
+</button> */}
+<button
+  className={`p-3 rounded-full text-white transition-all ${isRecording ? 'bg-[#C84A20]' : 'bg-[#8B3E2F] hover:bg-[#C84A20]'}`}
+  onClick={handleRecordingToggle}
+  type="button"
+  disabled={isTranscribing || charCount >= MAX_CHARS}
+>
+  {isRecording ? (
+    <StopIcon className="w-6 h-6" />
+  ) : isTranscribing ? (
+    <div className="animate-spin w-6 h-6 border-4 border-white border-t-transparent rounded-full"></div>
+  ) : (
+    <MicrophoneIcon className="w-6 h-6" />
+  )}
+</button>
+{/* status indicator */}
+{recordingStatus && (
+  <div className="text-xs text-gray-400 ml-2 inline-flex items-center">
+    {recordingStatus}
+    {isRecording && (
+      <span className="inline-block w-2 h-2 bg-red-500 rounded-full ml-2 animate-pulse" />
+    )}
+  </div>
+)}
 {/* translate button */}
                     <button
                       type="button"

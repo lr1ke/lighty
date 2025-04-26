@@ -20,7 +20,7 @@ interface Entry {
 export async function GET(req: NextRequest) {
     try {
         // const user_id = await getAuthenticatedUserId(req);
-        const user_id = "c2b008fb-9eae-4aef-bbde-49898dab8c78";
+        const user_id = "a05602c5-6ace-4819-91f3-bb0e0f329c85";
         if (!user_id) {
           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

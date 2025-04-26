@@ -24,27 +24,36 @@ export default function Page() {
         </p>
         
         <p className={`${styles.textSecondary} mb-4`}>
-        How to uses this diary        
+        {/* How to use this diary         */}
         </p>
         <ul className={`list-disc pl-5 ${styles.textPrimary} mb-4`}>
-          <li className="mb-2">Create new entries to capture what is happening in your life</li>
-          <li className="mb-2">View your personal entries to reflect on past experiences</li>
-          <li className="mb-2">Explore global entries to connect with others</li>
-          <li className="mb-2">Use the buttons around an entry to explore related topics, subgroups, or locations.</li>
-          <li className="mb-2">Record your thoughts or listen to entries with the text-to-speech functionality.</li>
-          <li className="mb-2">Try out our AI Assistant to analyze entries </li>
+          <li className="mb-2">create new entries to capture what is happening in your life</li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"This room moves at the same speed as the clouds."</p>
+          <li className="mb-2">view your personal entries to reflect on past experiences</li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"This room gets as wide as an ocean at the other end."</p>
+          <li className="mb-2">record your thoughts or listen to entries</li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"Stay until the room is blue."</p>
+          <li className="mb-2">explore global entries to connect with others</li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"Find other rooms that exist in this space"</p>
+          <li className="mb-2">explore related topics, subgroups, or locations.</li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"Many rooms, many dreams, many countries in this space."</p>
+          <li className="mb-2">try out our AI Assistant to analyze entries </li>
+          <p className={`${styles.textSecondary} italic mb-2`}>"This room slowly evaporates every day."(Yoko Ono)</p>
+          {/* <p className={`${styles.textSecondary} italic mb-2`}>(Yoko Ono)</p> */}
+
         </ul>
         
-        <p className={`${styles.textSecondary} py-12 italic`}>
-          "Words, works, worlds" - let's co-create a shared narrative.
-        </p>
+        {/* <p className={`${styles.textSecondary} py-12 italic`}> */}
+          {/* Words, works, worlds" - let's co-create a shared narrative. */}
+          {/* Let's write together, dream together, co-create music of the mind */}
+        {/* </p> */}
 
-        <p className={`${styles.textSecondary} mb-4`}>
+        <p className={`${styles.textPrimary} mb-4`}>
             Guidelines        </p>
         <ul className={`list-disc pl-5 ${styles.textPrimary} mb-4`}>
-          <li className="mb-2">Don't sign your diary entries - keep them anonymous</li>
+          <li className="mb-2">Don't sign your diary entries</li>
           <li className="mb-2">Don't use real names or identifiable details</li>
-          <li className="mb-2">No product placing or propaganda allowed</li>
+          <li className="mb-2">No product placing, no propaganda </li>
 
 
 

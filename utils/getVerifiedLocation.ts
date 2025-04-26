@@ -165,53 +165,6 @@ export const getVerifiedLocation = async (options?: VerifiedLocationOptions): Pr
     console.log('Browser location result:', browserLoc);
     console.log('IP location result:', ipLoc);
 
-    // If browser location is available
-    // if (browserLoc && 
-    //     browserLoc.location.latitude !== 0 && 
-    //     browserLoc.location.longitude !== 0) {
-      
-      // Check for significant location discrepancies
-      // if (ipLoc && 
-      //     ipLoc.location.latitude !== 0 && 
-      //     ipLoc.location.longitude !== 0) {
-        
-      //   const distance = calculateDistance(browserLoc.location, ipLoc.location);
-      //   console.log(`Distance between browser and IP locations: ${distance.toFixed(2)} km`);
-        
-    //     // Compare city names (case-insensitive)
-    //     const browserCity = browserLoc.city.toLowerCase();
-    //     const ipCity = ipLoc.city.toLowerCase();
-        
-    //     // If the distance is significant AND the cities don't match at all
-    //     if (distance > 50 && 
-    //         browserCity !== 'unknown' && 
-    //         ipCity !== 'unknown' && 
-    //         !browserCity.includes(ipCity) && 
-    //         !ipCity.includes(browserCity)) {
-          
-    //       console.log('Location mismatch detected between browser and IP');
-    //       // Still use browser location as user explicitly granted permission
-    //       return browserLoc;
-    //     }
-    //   }
-    //   // If no major discrepancy or IP location unavailable, use browser location
-    //   return browserLoc;
-    // }
-
-    // If browser location not available, use IP location
-    // if (ipLoc) {
-    //   if (showToasts) {
-    //     toast('Browser location unavailable. Using network location.', { 
-    //       id: 'location-fallback-toast',
-    //       icon: 'ℹ️',
-    //       duration: 4000
-    //     });
-    //   }
-    //   return ipLoc;
-    // }
-
-    // Inside your getVerifiedLocation function, replace the browser location check with this:
-
 // If browser location is available
 if (browserLoc && 
   browserLoc.location.latitude !== 0 && 

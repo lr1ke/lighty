@@ -5,8 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import postgres from 'postgres';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-
-
 interface LocationData {
   latitude: number;
   longitude: number;
@@ -29,10 +27,6 @@ export async function POST(req: NextRequest) {
     }
     
     const { content, theme_id, location }: EntryRequestBody = await req.json();
-    console.log({ content, theme_id, location }); // Log the input data
-
-
-
 
     // ✅ Validate content
     if (!content || content.length > 500) {
@@ -67,69 +61,15 @@ export async function POST(req: NextRequest) {
     let state = 'Unknown';
     
 // Process location if provided and valid
-if (location && typeof location === 'object' && 
+if (location && 
   typeof location.latitude === 'number' && 
   typeof location.longitude === 'number') {
-
-// Create the geo point for PostgreSQL
 geoPoint = sql`ST_SetSRID(ST_MakePoint(${location.longitude}, ${location.latitude}), 4326)`;
 
-// IMPORTANT: Use the city and state that came from the client first
 city = location.city || 'Unknown';
 state = location.state || 'Unknown';
-
 console.log('Using location from client:', { city, state, coords: [location.latitude, location.longitude] });
-
-// Only do reverse geocoding if we don't have city/state already
-if (city === 'Unknown' || state === 'Unknown') {
-  try {
-    const openCageKey = process.env.OPENCAGE_API_KEY;
-    
-    if (openCageKey) {
-      console.log('Attempting to fetch location with OpenCage API...');
-
-      const geoRes = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${location.latitude}+${location.longitude}&key=${openCageKey}`
-      );
-      console.log('OpenCage API status:', geoRes.status);
-
-      if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        console.log('OpenCage API response:', JSON.stringify(geoData));
-
-        const components = geoData?.results?.[0]?.components;
-        
-        if (components) {
-          city = components.city || components.town || components.village || city;
-          state = components.state || state;
-        }
-      } else {
-        console.warn('OpenCage API returned status:', geoRes.status);
-      }
-    } else {
-      console.warn('Missing OpenCage API key');
-    }
-  } catch (geoError) {
-    console.warn('Geolocation fetch failed:', geoError);
   }
-}
-} else {
-      console.log('No valid location coordinates provided');
-      
-      // Optional: Fallback to IP-based location
-      try {
-        const ipRes = await fetch('https://ipinfo.io/json');
-        if (ipRes.ok) {
-          const ipData = await ipRes.json();
-          if (ipData) {
-            city = ipData.city || city;
-            state = ipData.region || state;
-          }
-        }
-      } catch (ipError) {
-        console.warn('IP-based location fallback failed:', ipError);
-      }
-    }
 
     // ✅ Insert entry with theme + thread (if any) + location (if any)
     await sql`
