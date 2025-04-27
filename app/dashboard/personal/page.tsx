@@ -75,7 +75,6 @@ const PersonalComp: React.FC = () => {
         setOffset((prevOffset) => prevOffset + LIMIT);
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loading]);
@@ -90,7 +89,6 @@ const PersonalComp: React.FC = () => {
 
   return (
     <div className="relative min-h-screen">
-
     <div className={`max-w-2xl mx-auto  overflow-hidden ${styles.bgPrimary}`}>
       <div className="relative z-10">
         <div className={`sticky top-0 z-20 ${styles.bgSecondary} bg-opacity-90 backdrop-blur-sm ${styles.borderColor} border-b shadow-lg`}>
@@ -159,7 +157,7 @@ const PersonalComp: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
                   <span className={`flex items-center text-xs sm:text-sm transition-colors ${styles.textSecondary}`}>
-                                        {/* themes button */}
+                    {/* themes button */}
                   <Link href={`/dashboard/themes/${entry.theme_id}`} passHref>
                         <button
                           className={`flex items-center justify-center w-5 h-2 squared-full text-xs ${themeColors[entry.theme_name.trim()] || 'bg-gray-500'}`}
@@ -172,7 +170,7 @@ const PersonalComp: React.FC = () => {
                         {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, {''}
                         {new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
                       </span>
-                      {/* translate button */}
+                      {/* read entry out loud button */}
                       <button
                         className={`transition-opacity ml-2 hover:opacity-80 ${styles.textSecondary}`}
                         onMouseEnter={() => handleMouseEnter(entry.content, translateTo)}

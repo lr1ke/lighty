@@ -37,38 +37,14 @@ const detectLanguage = (text: string): string => {
   return "en";
 };
 
-const getRandomVoice = (): string => {
-  return ALL_VOICES[Math.floor(Math.random() * ALL_VOICES.length)];
-};
-
-// const translateText = async (text: string, targetLang: string): Promise<string> => {
-//   try {
-//     const response = await axios.post(
-//       "https://api.openai.com/v1/chat/completions",
-//       {
-//         model: "gpt-4",
-//         messages: [
-//           {
-//             role: "system",
-//             content: `Translate the following text into ${targetLang}. Maintain all original spacing, punctuation, and formatting. Do not modify, normalize, or correct the text in any way besides translation.`,
-//           },
-//           { role: "user", content: text },
-//         ],
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${OPENAI_API_KEY}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     return response.data.choices[0].message.content.trim();
-//   } catch (error) {
-//     console.error("Translation Error:", error);
-//     return text;
-//   }
+// const getRandomVoice = (): string => {
+//   return ALL_VOICES[Math.floor(Math.random() * ALL_VOICES.length)];
 // };
 
+const getRandomVoice = (): string => {
+  const weightedVoices = ["nova", "shimmer", "alloy", "echo", "fable", "onyx"];
+  return weightedVoices[Math.floor(Math.random() * weightedVoices.length)];
+};
 
 
 const translateText = async (text: string, targetLang: string): Promise<string> => {
