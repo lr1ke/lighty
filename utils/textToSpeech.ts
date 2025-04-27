@@ -1,9 +1,6 @@
-// problematic: nine out of ten it's a male voice 
-
 
 import axios from "axios";
 
-const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY!;
 const audioCache = new Map<string, string>(); // Cache audio URLs by key
 
 const ALL_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"];
@@ -44,28 +41,44 @@ const getRandomVoice = (): string => {
   return ALL_VOICES[Math.floor(Math.random() * ALL_VOICES.length)];
 };
 
+// const translateText = async (text: string, targetLang: string): Promise<string> => {
+//   try {
+//     const response = await axios.post(
+//       "https://api.openai.com/v1/chat/completions",
+//       {
+//         model: "gpt-4",
+//         messages: [
+//           {
+//             role: "system",
+//             content: `Translate the following text into ${targetLang}. Maintain all original spacing, punctuation, and formatting. Do not modify, normalize, or correct the text in any way besides translation.`,
+//           },
+//           { role: "user", content: text },
+//         ],
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${OPENAI_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return response.data.choices[0].message.content.trim();
+//   } catch (error) {
+//     console.error("Translation Error:", error);
+//     return text;
+//   }
+// };
+
+
+
 const translateText = async (text: string, targetLang: string): Promise<string> => {
   try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: `Translate the following text into ${targetLang}. Maintain all original spacing, punctuation, and formatting. Do not modify, normalize, or correct the text in any way besides translation.`,
-          },
-          { role: "user", content: text },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return response.data.choices[0].message.content.trim();
+    const response = await axios.post('/api/tools/translate', {
+      text,
+      targetLang
+    });
+    
+    return response.data.translatedText;
   } catch (error) {
     console.error("Translation Error:", error);
     return text;
@@ -89,19 +102,12 @@ export const handleMouseEnter = debounce(async (content: string, translateTo: st
 
   try {
     const response = await axios.post(
-      "https://api.openai.com/v1/audio/speech",
+      "/api/tools/speech",
       {
-        model: "tts-1-hd",
-        input: content,
+        text: content,
         voice: selectedVoice,
-        response_format: "mp3",
-        speed: 1.0,
       },
       {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
         responseType: "arraybuffer",
       }
     );
@@ -133,19 +139,12 @@ export const readEntryContent = async (text: string, translateTo?: string | null
 
   try {
     const response = await axios.post(
-      "https://api.openai.com/v1/audio/speech",
+      "/api/tools/speech",
       {
-        model: "tts-1-hd",
-        input: finalText,
+        text: finalText,
         voice: selectedVoice,
-        response_format: "mp3",
-        speed: 1.0,
       },
       {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
         responseType: "arraybuffer",
       }
     );
