@@ -113,7 +113,6 @@ const CreateComp: React.FC = () => {
     if (audioBlob) {
       console.log('Audio recorded:', audioBlob.size, 'bytes');
       handleTranscription();
-      // Don't set the status here, we'll handle it in the transcription function
     }
   }, [audioBlob]);
 
@@ -125,7 +124,6 @@ const CreateComp: React.FC = () => {
       const timeout = setTimeout(() => {
         setRecordingStatus('');
       }, 1000);
-      
       return () => clearTimeout(timeout);
     }
   }, [isRecording, isTranscribing]);
