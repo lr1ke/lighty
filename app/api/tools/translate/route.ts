@@ -1,71 +1,5 @@
 
-// import { NextRequest, NextResponse } from 'next/server';
-// import OpenAI from 'openai';
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     const { text, targetLanguage = 'English' } = await req.json();
-    
-//     if (!text) {
-//       return NextResponse.json(
-//         { error: 'No text provided' },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Default to translating to English if no target language specified
-//     const systemPrompt = `Translate the following text into ${targetLanguage}. 
-//     Only return the translated text, with no additional commentary.`;
-
-//     try {
-//       const completion = await openai.chat.completions.create({
-//         model: "gpt-4o", 
-//         messages: [
-//           {
-//             role: "system",
-//             content: systemPrompt,
-//           },
-//           { 
-//             role: "user", 
-//             content: text 
-//           },
-//         ],
-//         temperature: 0.3, 
-//       });
-
-//       const translatedText = completion.choices[0].message.content?.trim() || '';
-
-//       return NextResponse.json({ 
-//         translatedText,
-//         sourceText: text,
-//         targetLanguage
-//       });
-//     } catch (apiError: any) {
-//       console.error('OpenAI API error:', apiError);
-//       return NextResponse.json(
-//         { 
-//           error: 'Translation failed',
-//           details: apiError.message,
-//           code: apiError.code || apiError.status
-//         },
-//         { status: apiError.status || 500 }
-//       );
-//     }
-//   } catch (error: any) {
-//     console.error('Error processing translation request:', error);
-//     return NextResponse.json(
-//       { 
-//         error: 'Failed to process translation',
-//         details: error.message 
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
@@ -159,7 +93,11 @@ async function handleBatchTranslation(texts: string[], targetLanguage: string) {
       const batch = texts.slice(i, i + batchSize);
       
       // For small batches, we can combine them into a single prompt with markers
-      const batchPrompt = `Translate each of the following ${batch.length} texts into ${targetLanguage}.
+      const batchPrompt = `For each of the following ${batch.length} texts:
+      1. FIRST, detect the source language
+      2. If the source language is ALREADY ${targetLanguage}, return the original text unchanged
+      3. Otherwise, translate the text INTO ${targetLanguage}
+      
       Return a JSON array with each translated text, preserving the order:
 
       ${batch.map((t, idx) => `[Text ${idx+1}]: ${t}`).join('\n\n')}`;
